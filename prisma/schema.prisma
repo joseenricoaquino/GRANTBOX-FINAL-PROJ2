@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMINISTRATOR
+  STUDENT
+}
+
+model User {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  email          String   @unique
+  image          String?
+  hashedPassword String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // NEW
+  role        UserRole  @default(STUDENT)
+  address     String?
+  nationality String?
+  contact     String?
+  dob         DateTime?
+
+  // NOTIFS
+  newScholarship       Boolean? @default(false)
+  scholarshipDeadlines Boolean? @default(false)
+
+  studentCriteria   StudentCriteria?
+  studentBackground StudentBackground?
+  forms             Form[]
+}
+
+model Form {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+
+  // ACADEMIC INFORMATION
+  percentageGrade Int?
+  expectedGrad    String?
+  academicAwards  String?
+
+  // ACADEMIC BASED
+  fieldOfStudy String?
+
+  // NEED BASED
+  firstGen        Boolean?
+  hasDependents   Boolean?
+  householdIncome String?
+
+  // ATHLETIC BASED
+  sportsInvolved String?
+  highestLevel   String?
+  athleticAwards String?
+
+  // MILITARY BASED
+  militaryBranch     String?
+  veteranBranch      String?
+  interestedMilitary Boolean?
+
+  // COMMUNITY SERVICE BASED
+  communityActivities String?
+  hoursInCommunity    Int?
+  organizations       String?
+
+  // PWD BASED
+  disabilities  String?
+  interestedPWD Boolean?
+
+  studentId String @db.ObjectId
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model StudentCriteria {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  studentId String @unique @db.ObjectId
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  educationalLevel     String
+  gpa                  Float
+  nameOfPrevSchool     String
+  typeOfPrevSchool     SchoolType
+  financialStatus      String
+  universityPreference String[]
+  coursePreference     String[]
+
+  // TODO: add smth for club
+}
+
+model StudentBackground {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  studentId String @unique @db.ObjectId
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  isPWD                Boolean
+  isVarsityScholarship Boolean
+  isArtistScholarship  Boolean
+  isExtracurricular    Boolean
+  isLeader             Boolean
+  isMinority           Boolean
+  isStudentWorker      Boolean
+  isInnnovative        Boolean
+}
+
+enum SchoolType {
+  PUBLIC
+  PRIVATE
+  HOMESCHOOL
+  OTHER
+}
+
+model College {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  image    String?
+  location String
+  details  String
+  name     String
+
+  webLink String?
+
+  scholarships Scholarship[]
+}
+
+model Scholarship {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  collegeId String  @db.ObjectId
+  college   College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+
+  title           String
+  details         String
+  scholarshipType String
+  coverageType    String
+  deadline        DateTime?
+  formLink        String?
+
+  criteria Criteria?
+}
+
+model Criteria {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  scholarshipId String      @unique @db.ObjectId
+  scholarship   Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  grades          Int?
+  financialStatus String?
+  prevSchool      String?
+
+  location                  String?
+  citizenship               String?
+  extracurricularActivities String?
+  courseInterest            String?
+}
+
+model FAQ {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  question String
+  response String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
