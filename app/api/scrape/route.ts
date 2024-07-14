@@ -36,7 +36,8 @@ type UniversityEnum =
   | "University of the Philippines Diliman"
   | "University of Santo Tomas"
   | "Far Eastern University"
-  | "Pamantasan ng Lungsod ng Maynila";
+  | "Pamantasan ng Lungsod ng Maynila"
+  | "Colegio de San Juan de Letran";
 
 //Handles Scraping for DLSU Benilde
 async function handleBenildeScrape(url: string, university: UniversityEnum) {
@@ -124,6 +125,210 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
   }
   return cleanedData;
 }
+
+//SCraping Process Letran
+async function handleLetranScrape(url: string, university: UniversityEnum) {
+  // //Check first the college if in the database
+  // const existingCollege = await prisma.college.findFirst({
+  //   where: { name: university },
+  //   select: { id: true },
+  // });
+
+  // if (!existingCollege) {
+  //   console.log("Error: College isn't in the system yet!");
+  //   return [];
+  // }
+
+  // Scrape the data
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
+  await page.goto(url);
+
+  const scholarDataScrape = await page.evaluate(() => {
+    const scholarships = Array.from(document.querySelectorAll("#mCSB_2_container div:nth-of-type(n+3)"));
+  
+    if (!scholarships || scholarships.length === 0) {
+      console.log("No scholarship elements found.");
+      return [];
+    }
+
+    const cleanText = (text: any) => {
+      return text
+        .replace(/\n/g, ' ') // replace newlines with spaces
+        .replace(/\s\s+/g, ' ') // replace multiple spaces with a single space
+        .replace(/according to the following scheme:/g, '') // remove the specified phrase
+        .replace(/In addition, the scholars will enjoy the following/g, '') // remove specific phrase
+        .trim(); // trim leading and trailing spaces
+        
+    };
+  
+    const data = scholarships.map(scholarship => {
+      const titleElement = scholarship.querySelector("a");
+      const title = titleElement ? cleanText(titleElement.textContent).trim() : "N/A";
+      const detailsElement = scholarship.querySelector(".panel-body p#pcontentwhite:nth-of-type(1)");
+      const details = detailsElement ? cleanText(detailsElement.textContent).trim() : "N/A";
+  
+      let criteria = "";
+      let eligibility = "";
+      let coverageType = "";
+      let extracurricularActivities =""
+  
+      const sections = Array.from(scholarship.querySelectorAll("p#titlewhite, p#pcontentwhite"));
+  
+      sections.forEach(section => {
+        const sectionTitle = cleanText(section.textContent);
+
+        if (sectionTitle.includes("Benefits and Privileges")) {
+          const benefitsList = section.nextElementSibling;
+          if (benefitsList) {
+            coverageType = cleanText(benefitsList.textContent);
+          }
+        }
+
+        if (sectionTitle.includes("Other Requirements")) {
+          const extracurricularList = section.nextElementSibling?.nextElementSibling;
+          if (extracurricularList) {
+            extracurricularActivities = cleanText(extracurricularList.textContent);
+          }
+        }
+  
+        if (sectionTitle.includes("Criteria/Qualifications")) {
+          const criteriaList = section.nextElementSibling?.nextElementSibling;
+          if (criteriaList) {
+            criteria = cleanText(criteriaList.textContent);
+          }
+        }
+  
+        if (sectionTitle.includes("Eligibility")) {
+          const eligibilityList = section.nextElementSibling;
+          if (eligibilityList) {
+            eligibility = cleanText(eligibilityList.textContent);
+          }
+        }
+      });
+
+      const combinedEligibility = cleanText(`${criteria} ${eligibility}`.trim());
+  
+      return {
+        title,
+        details,
+        eligibility: combinedEligibility,
+        coverageType,
+        extracurricularActivities
+
+      };
+    });
+  
+    return data;
+  });
+  
+  console.log(scholarDataScrape);
+  await browser.close()
+  return scholarDataScrape;
+}
+
+//SCraping Process Ateneo
+async function handleAteneoScrape(url: string, university: UniversityEnum) {
+  // //Check first the college if in the database
+  // const existingCollege = await prisma.college.findFirst({
+  //   where: { name: university },
+  //   select: { id: true },
+  // });
+
+  // if (!existingCollege) {
+  //   console.log("Error: College isn't in the system yet!");
+  //   return [];
+  // }
+
+  // Scrape the data
+  const browser = await puppeteer.launch({ headless: false });
+  const page = await browser.newPage();
+  await page.goto(url);
+
+  const scholarDataScrape = await page.evaluate(() => {
+    const scholarships = Array.from(document.querySelectorAll("div.accordion-item"));
+  
+    if (!scholarships || scholarships.length === 0) {
+      console.log("No scholarship elements found.");
+      return [];
+    }
+
+    const cleanText = (text: any) => {
+      return text
+        .replace(/\n/g, ' ') // replace newlines with spaces
+        .replace(/\s\s+/g, ' ') // replace multiple spaces with a single space
+        .replace(/according to the following scheme:/g, '') // remove the specified phrase
+        .replace(/In addition, the scholars will enjoy the following/g, '') // remove specific phrase
+        .trim(); // trim leading and trailing spaces
+        
+    };
+  
+    const data = scholarships.map(scholarship => {
+      const titleElement = scholarship.querySelector("h4");
+      const title = titleElement ? cleanText(titleElement.textContent).trim() : "N/A";
+      const detailsElement = scholarship.querySelector("div.accordion-body");
+      const details = detailsElement ? cleanText(detailsElement.textContent).trim() : "N/A";
+  
+      let criteria = "";
+      let eligibility = "";
+      let coverageType = "";
+      let extracurricularActivities =""
+  
+      const sections = Array.from(scholarship.querySelectorAll("p#titlewhite, p#pcontentwhite"));
+  
+      sections.forEach(section => {
+        const sectionTitle = cleanText(section.textContent);
+
+        if (sectionTitle.includes("Benefits and Privileges")) {
+          const benefitsList = section.nextElementSibling;
+          if (benefitsList) {
+            coverageType = cleanText(benefitsList.textContent);
+          }
+        }
+
+        if (sectionTitle.includes("Other Requirements")) {
+          const extracurricularList = section.nextElementSibling?.nextElementSibling;
+          if (extracurricularList) {
+            extracurricularActivities = cleanText(extracurricularList.textContent);
+          }
+        }
+  
+        if (sectionTitle.includes("Criteria/Qualifications")) {
+          const criteriaList = section.nextElementSibling?.nextElementSibling;
+          if (criteriaList) {
+            criteria = cleanText(criteriaList.textContent);
+          }
+        }
+  
+        if (sectionTitle.includes("Eligibility")) {
+          const eligibilityList = section.nextElementSibling;
+          if (eligibilityList) {
+            eligibility = cleanText(eligibilityList.textContent);
+
+          }
+        }
+      });
+
+      const combinedEligibility = cleanText(`${criteria} ${eligibility}`.trim());
+  
+      return {
+        title,
+        details,
+        eligibility: combinedEligibility,
+        coverageType,
+        extracurricularActivities
+
+      };
+    });
+  
+    return data;
+  });
+  
+  console.log(scholarDataScrape);
+  await browser.close()
+  return scholarDataScrape;
+}
+
 
 async function handleFEUScrape(url: string, university: UniversityEnum) {
   //Check first the college if in the database
@@ -338,6 +543,17 @@ async function handleBrowseUniversity(university: UniversityEnum) {
         "https://www.feu.edu.ph/cost-and-aid/scholarship-grants/",
         university
       );
+
+     case "Colegio de San Juan de Letran":
+        return handleLetranScrape(
+          "https://www.letran.edu.ph/Admission/Home",
+          university
+        );  
+        case "Ateneo de Manila University":
+          return handleAteneoScrape(
+            "https://www.ateneo.edu/college/scholarships/programs",
+            university
+          );  
     default:
       return [];
   }
@@ -350,7 +566,9 @@ export async function POST(request: Request) {
 
     const UNIVERSITIES: UniversityEnum[] = [
       // "De La Salle Benilde",
-      "Far Eastern University",
+      //"Far Eastern University",
+     "Colegio de San Juan de Letran",
+      "Ateneo de Manila University"
     ];
 
     const allScholarships = await Promise.all(

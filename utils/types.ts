@@ -127,7 +127,8 @@ export type UniversityPreferenceType =
   | "University of San Carlos"
   | "Cebu Technological University"
   | "Mindanao State University"
-  | "University of Southern Mindanao";
+  | "University of Southern Mindanao"
+  | "Colegio de San Juan de Letran";
 export const UniversityPreferenceEnum: UniversityPreferenceType[] = [
   "Adamson University",
   "Air Link International Aviation College",
@@ -158,6 +159,7 @@ export const UniversityPreferenceEnum: UniversityPreferenceType[] = [
   "Cebu Technological University",
   "Mindanao State University",
   "University of Southern Mindanao",
+  "Colegio de San Juan de Letran",
 ];
 
 export type CollegeCourseType =
