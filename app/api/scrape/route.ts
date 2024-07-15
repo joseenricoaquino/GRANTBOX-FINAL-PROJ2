@@ -21,6 +21,7 @@ interface Scraped {
   eligibility: string;
   deadline: string;
   url: string;
+  formLink: string;
   gwa: string | undefined;
   financial: string | undefined;
   citizenship: string | undefined;
@@ -70,6 +71,7 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
     }
 
     return scholarshipTab.map((scholarr: Element) => {
+
       const titleElement = scholarr.querySelector(
         "div.jltma-accordion-title-text"
       ) as HTMLElement;
@@ -89,6 +91,13 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
         "ul:nth-of-type(3), p:nth-of-type(8)"
       ) as HTMLElement;
 
+       // Extract the scholarship application form link   
+      const scholarformElement = scholarr.querySelector("li > span > a") as HTMLAnchorElement;
+      const clickformLink = scholarformElement && scholarformElement.textContent?.includes("CLICK HERE")
+      ? scholarformElement.href
+      : "N/A";
+    
+
       return {
         title: titleElement ? titleElement.innerText : "N/A",
         description: descriptionElement ? descriptionElement.innerText : "N/A",
@@ -98,6 +107,7 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
           : "N/A",
         deadline: deadlineElement ? deadlineElement.innerText : "N/A",
         url: "N/A",
+        formLink: clickformLink, 
         gwa: gwaElement ? gwaElement.innerText : "N/A",
         financial: undefined,
         citizenship: undefined,
@@ -246,6 +256,7 @@ async function handleAteneoScrape(url: string, university: UniversityEnum) {
   await page.goto(url);
 
   const scholarDataScrape = await page.evaluate(() => {
+   
     const scholarships = Array.from(document.querySelectorAll("div.accordion-item"));
   
     if (!scholarships || scholarships.length === 0) {
@@ -412,11 +423,11 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
         return benefitsData.length > 0 ? benefitsData : ["Benefits not found"];
       })) as any;
 
-      // Locate and scrape benefits from the page
+      // Locate and scrape ELIGIBILITY from the page
       const eligibility: string[] = (await page.evaluate(() => {
         const eligibilityData: string[] = [];
 
-        // Find all elements containing benefits information
+        // Find all elements containing ELIGIBILITY information
         const eligibilityElements = Array.from(
           document.querySelectorAll(
             "h2, h3, h4, h5, h6, p:nth-of-type(5) strong"
@@ -464,7 +475,7 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
         console.log("Eligibility text:", text); // Debug logging
 
         if (text.includes("GWA")) {
-          // has grades
+          
           let match = text.match(gwaRegex);
           if (match && match[1]) {
             gwa = match[1];
@@ -494,11 +505,14 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
         benefits: benefits.join(" ").replace(/\n/g, " ").trim(),
         eligibility: eligibility.join(" ").replace(/\n/g, " ").trim(),
         url: scholarship.url,
+        formLink: "NA",
         deadline: "N/A",
         gwa,
         financial,
         citizenship,
       };
+
+      console.log(newScholarship)
 
       scholarDataScrape.push(newScholarship);
 
@@ -565,10 +579,10 @@ export async function POST(request: Request) {
     const {} = body;
 
     const UNIVERSITIES: UniversityEnum[] = [
-      // "De La Salle Benilde",
+       "De La Salle Benilde",
       //"Far Eastern University",
-     "Colegio de San Juan de Letran",
-      "Ateneo de Manila University"
+    // "Colegio de San Juan de Letran",
+      // "Ateneo de Manila University"
     ];
 
     const allScholarships = await Promise.all(
@@ -625,6 +639,7 @@ function DataClean(
 
       let financialType = parseFinancial(element.financial);
       newCriteria.financialStatus = financialType;
+      
 
       return { newScholarship, newCriteria };
     });

@@ -57,7 +57,7 @@ export default function StudentMainTemplate({
     },
     [currentUser]
   ); // Add dependencies here
-
+  console.log(recommended);
   useEffect(() => {
     if (recommended && recommended.data) {
       const toNotif = recommended.data
