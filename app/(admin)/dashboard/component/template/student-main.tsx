@@ -32,9 +32,9 @@ export default function StudentMainTemplate({
   // Define sendEmail inside useCallback
   const sendEmail = useCallback(
     (key: string, scholarships: FullScholarshipType[]) => {
-      const service_id = "service_4pkan6x";
-      const template_id = "template_8nheg1w";
-      const user_id = "ceIp0fgC0JxwJEHUj";
+      const service_id = "service_sa36w8r";
+      const template_id = "template_t1xhfkk";
+      const user_id = "r50xqQOwMhBw6Htv7";
       const template_params = {
         to_email: `${currentUser.email}`,
         to_name: `${currentUser.name}`,
