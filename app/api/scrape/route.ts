@@ -43,14 +43,18 @@ type UniversityEnum =
 //Handles Scraping for DLSU Benilde
 async function handleBenildeScrape(url: string, university: UniversityEnum) {
   //Check first the college if in the database
-  const existingCollege = await prisma.college.findFirst({
+  let existingCollege = await prisma.college.findFirst({
     where: { name: university },
     select: { id: true },
   });
 
   if (!existingCollege) {
     console.log("Error: College isn't in the system yet!");
-    return [];
+    existingCollege = (await prisma.college.create({
+      data: { name: university, location: "N/A", details: "N/A" },
+    })) as any;
+    console.log(existingCollege);
+    console.log("Created blank college!");
   }
 
   // Scrape the data
@@ -117,13 +121,13 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
 
   await browser.close();
 
-  let cleanedData = DataClean(scholarDataScrape, existingCollege.id);
+  let cleanedData = DataClean(scholarDataScrape, existingCollege?.id || "");
 
   //Remove all the scholarship for that university if a new data has been scraped and then add the new scholarships
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege.id },
+        where: { collegeId: existingCollege?.id },
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -138,16 +142,22 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
 
 //SCraping Process Letran
 async function handleLetranScrape(url: string, university: UniversityEnum) {
-  // //Check first the college if in the database
-  // const existingCollege = await prisma.college.findFirst({
-  //   where: { name: university },
-  //   select: { id: true },
-  // });
+  //Check first the college if in the database
+  let existingCollege = await prisma.college.findFirst({
+    where: { name: university },
+    select: { id: true },
+  });
 
-  // if (!existingCollege) {
-  //   console.log("Error: College isn't in the system yet!");
-  //   return [];
-  // }
+  if (!existingCollege) {
+    console.log("Error: College isn't in the system yet!");
+    existingCollege = (await prisma.college.create({
+      data: { name: university, location: "N/A", details: "N/A" },
+    })) as any;
+    console.log(existingCollege);
+    console.log("Created blank college!");
+  }
+
+  console.log(url)
 
   // Scrape the data
   const browser = await puppeteer.launch({ headless: true });
@@ -221,11 +231,17 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
   
       return {
         title,
-        details,
         eligibility: combinedEligibility,
         coverageType,
-        extracurricularActivities
-
+        extracurricularActivities,
+        description:details, 
+        benefits:coverageType, 
+        deadline:"", 
+        url:"",
+        formLink:"", 
+        gwa:undefined, 
+        financial:undefined, 
+        citizenship:undefined
       };
     });
   
@@ -234,28 +250,51 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
   
   console.log(scholarDataScrape);
   await browser.close()
-  return scholarDataScrape;
+
+  let cleanedData = DataClean(scholarDataScrape, existingCollege?.id || "");
+
+  //Remove all the scholarship for that university if a new data has been scraped and then add the new scholarships
+  if (cleanedData.length > 0) {
+    await prisma.$transaction([
+      prisma.scholarship.deleteMany({
+        where: { collegeId: existingCollege?.id || "" },
+      }),
+      prisma.scholarship.createMany({
+        data: cleanedData.map((d) => d.newScholarship),
+      }),
+      prisma.criteria.createMany({
+        data: cleanedData.map((d) => d.newCriteria),
+      }),
+    ]);
+  }
+  return cleanedData;
 }
 
 //SCraping Process Ateneo
 async function handleAteneoScrape(url: string, university: UniversityEnum) {
-  // //Check first the college if in the database
-  // const existingCollege = await prisma.college.findFirst({
-  //   where: { name: university },
-  //   select: { id: true },
-  // });
+  //Check first the college if in the database
+  let existingCollege = await prisma.college.findFirst({
+    where: { name: university },
+    select: { id: true },
+  });
 
-  // if (!existingCollege) {
-  //   console.log("Error: College isn't in the system yet!");
-  //   return [];
-  // }
+  if (!existingCollege) {
+    console.log("Error: College isn't in the system yet!");
+    existingCollege = (await prisma.college.create({
+      data: { name: university, location: "N/A", details: "N/A" },
+    })) as any;
+    console.log(existingCollege);
+    console.log("Created blank college!");
+  }
+
+  console.log(url)
 
   // Scrape the data
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
   await page.goto(url);
 
-  const scholarDataScrape = await page.evaluate(() => {
+  const scholarDataScrape:Scraped[] = await page.evaluate(() => {
    
     const scholarships = Array.from(document.querySelectorAll("div.accordion-item"));
   
@@ -324,11 +363,17 @@ async function handleAteneoScrape(url: string, university: UniversityEnum) {
   
       return {
         title,
-        details,
-        eligibility: combinedEligibility,
+        eligibility: details,
         coverageType,
-        extracurricularActivities
-
+        extracurricularActivities,
+        description:details, 
+        benefits:details, 
+        deadline:"", 
+        url:"",
+        formLink:"", 
+        gwa:undefined, 
+        financial:undefined, 
+        citizenship:undefined
       };
     });
   
@@ -337,7 +382,25 @@ async function handleAteneoScrape(url: string, university: UniversityEnum) {
   
   console.log(scholarDataScrape);
   await browser.close()
-  return scholarDataScrape;
+
+  let cleanedData = DataClean(scholarDataScrape, existingCollege?.id || "");
+
+  //Remove all the scholarship for that university if a new data has been scraped and then add the new scholarships
+  if (cleanedData.length > 0) {
+    await prisma.$transaction([
+      prisma.scholarship.deleteMany({
+        where: { collegeId: existingCollege?.id || "" },
+      }),
+      prisma.scholarship.createMany({
+        data: cleanedData.map((d) => d.newScholarship),
+      }),
+      prisma.criteria.createMany({
+        data: cleanedData.map((d) => d.newCriteria),
+      }),
+    ]);
+  }
+  return cleanedData;
+
 }
 
 
@@ -580,16 +643,16 @@ export async function POST(request: Request) {
 
     const UNIVERSITIES: UniversityEnum[] = [
        "De La Salle Benilde",
-      //"Far Eastern University",
-    // "Colegio de San Juan de Letran",
-      // "Ateneo de Manila University"
+      "Far Eastern University",
+    "Colegio de San Juan de Letran",
+      "Ateneo de Manila University"
     ];
 
     const allScholarships = await Promise.all(
       UNIVERSITIES.map((university) => handleBrowseUniversity(university))
     );
 
-    console.log(allScholarships);
+    console.log(allScholarships)
 
     return NextResponse.json("Success");
   } catch (error) {
@@ -605,7 +668,6 @@ function DataClean(
   collegeId: string
 ): { newScholarship: Scholarship; newCriteria: Criteria }[] {
   if (data.length <= 0) return [];
-  console.log(data);
 
   let cleanedData: { newScholarship: Scholarship; newCriteria: Criteria }[] =
     data.map((element) => {
@@ -617,12 +679,14 @@ function DataClean(
         scholarshipType: "N/A",
         coverageType: "",
         deadline: new Date(),
-        formLink: element.url,
+        formLink: element.formLink ? element.formLink : "",
       };
 
       let coverageType = parseCoverage(element.benefits);
+      let parsedDeadline = parseDeadline(element.deadline);
 
       newScholarship.coverageType = coverageType;
+      newScholarship.deadline = parsedDeadline;
 
       let newCriteria: Criteria = {
         id: new ObjectId().toHexString(),
@@ -637,9 +701,10 @@ function DataClean(
         courseInterest: null,
       };
 
-      let financialType = parseFinancial(element.financial);
-      newCriteria.financialStatus = financialType;
-      
+      newCriteria.financialStatus = parseFinancial(element.eligibility);
+      newCriteria.grades = parseGPA(element.eligibility);
+      newCriteria.citizenship = parseCitizen(element.eligibility)
+      newCriteria.extracurricularActivities = parseExtraCurricular(element.benefits)
 
       return { newScholarship, newCriteria };
     });
@@ -648,17 +713,34 @@ function DataClean(
 }
 
 function parseCoverage(t: string): CoverageType | string {
-  if (t.toLocaleLowerCase().includes("full scholarship") || t.toLocaleLowerCase().includes("full tuition")) {
+  if (t.toLocaleLowerCase().includes("full scholarship") || t.toLocaleLowerCase().includes("full tuition") || t.toLocaleLowerCase().includes("full discount") || t.toLocaleLowerCase().includes("100% tuition")) {
     return "Full Tuition";
-  } else if (t.toLocaleLowerCase().includes("partial scholarship")) {
+  } else if (t.toLocaleLowerCase().includes("partial scholarship") || t.toLocaleLowerCase().includes("tuition discounts")) {
     return "Partial Tuition";
   } else {
     // nothing matches
     return "N/A";
   }
 }
-function parseFinancial(t: string | undefined): FinancialStatusType | string {
-  if (!t) return "N/A";
+function parseFinancial(strEligibility:string):FinancialStatusType{
+  let monthlyIncomeRegex;
+  if(strEligibility.includes("monthly income")){
+    monthlyIncomeRegex = /monthly income.*?(\d[\d,]*)/;
+
+    // Extract the nearest number to "monthly income"
+    const incomeMatch = strEligibility.match(monthlyIncomeRegex);
+    
+    if (incomeMatch) {
+      return getFinancial(incomeMatch[1].split(",").join());
+    } else {
+      console.log('No match found');
+    }
+  }
+
+  return "Not Specified"
+}
+function getFinancial(t: string | undefined): FinancialStatusType {
+  if (!t) return "Not Specified";
 
   let checking = parseInt(t.split(",").join(""));
   if (checking <= 100000) {
@@ -666,6 +748,79 @@ function parseFinancial(t: string | undefined): FinancialStatusType | string {
   } else if (checking > 100000 && checking <= 200000)
     return FinancialStatusEnum[1];
   else {
-    return "N/A";
+    return "Not Specified";
   }
+}
+function parseDeadline(strDeadline:string){
+  const dateRegex = /\b(?:January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}-\b(?:January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}/g;
+  const dates = strDeadline.match(dateRegex);
+  if(dates){
+    let singleDateStr = dates[0]
+    const firstDateRegex = /\b(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}/;
+    const firstDateMatch = singleDateStr.match(firstDateRegex);
+    if (firstDateMatch) {
+      let newDate = new Date(firstDateMatch[0])
+      newDate.setFullYear(new Date().getFullYear())
+      return newDate
+    } else {
+      console.log('No match found');
+    }
+  }
+  return new Date()
+}
+function parseGPA(strEligibility:string){
+  let gpaRegex
+  if(strEligibility.includes("Grade Point Average")){
+    gpaRegex = /Grade Point Average.*?(\d+)/;
+
+    const gpaMatch = strEligibility.match(gpaRegex);
+
+  if (gpaMatch) {
+    return parseInt(gpaMatch[1])
+  } else {
+    console.log('No match found');
+    } 
+  }else if(strEligibility.includes("weighted average")){
+    gpaRegex = /weighted average.*?(\d+)/;
+
+    const gpaMatch = strEligibility.match(gpaRegex);
+
+  if (gpaMatch) {
+    return parseInt(gpaMatch[1])
+  } else {
+    console.log('No match found');
+    } 
+  }
+  return null
+}
+function parseCitizen(strEligibility:string){
+
+  let citizenshipRegex
+  if (strEligibility.includes("citizen")) {
+    // has citizen status
+    citizenshipRegex = /(\w+)\s+citizen/i;
+    let match = strEligibility.match(citizenshipRegex);
+    if (match && match[1]) {
+      
+      let ct = match[1];
+
+      let found = ["Filipino","American","Chinese"].find((t)=>ct.toLocaleLowerCase()===t.toLocaleLowerCase());
+
+      if(found){
+        return found;
+      }
+    
+    }
+  }
+
+  return null
+}
+function parseExtraCurricular(strEligibility:string){
+
+  let regex
+  if (strEligibility.includes("student-athletes")) {
+    return "Student Athlete"
+  }
+
+  return null
 }
