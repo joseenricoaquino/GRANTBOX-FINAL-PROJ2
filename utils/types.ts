@@ -18,6 +18,7 @@ export const ScholarshipMapping = {
 };
 
 export type ScholarshipType =
+  | "N/A"
   | "Athletic Scholarship"
   | "Academic Scholarship"
   | "Need-Based Scholarship"
@@ -83,6 +84,7 @@ export const Half2CoverageTypeEnum: CoverageType[] = [
 ];
 
 export type FinancialStatusType =
+  | "Not Specified"
   | "Below PHP 100,000"
   | "PHP 100,001 - PHP 200,000"
   | "PHP 200,001 - PHP 300,000"
@@ -90,6 +92,7 @@ export type FinancialStatusType =
   | "PHP 500,001 - PHP 1,000,000"
   | "Above PHP 1,000,000";
 export const FinancialStatusEnum: FinancialStatusType[] = [
+  "Not Specified",
   "Below PHP 100,000",
   "PHP 100,001 - PHP 200,000",
   "PHP 200,001 - PHP 300,000",
