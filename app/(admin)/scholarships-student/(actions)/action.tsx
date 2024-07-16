@@ -74,3 +74,24 @@ export const getRecommendations = async (collegeId: string) => {
     console.log(error);
   }
 };
+
+export const updatedScholarshipClicks = async (
+  scholarId: string,
+  prevClicks: number
+) => {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) return undefined;
+
+  try {
+    const data = await prisma.scholarship.update({
+      where: { id: scholarId },
+      data: {
+        number_of_clicks: prevClicks + 1,
+      },
+    });
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};

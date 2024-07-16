@@ -27,7 +27,7 @@ const ScholarshipCard = ({
         <h2 className="font-bold text-base text-center h-28 overflow-hidden">
           {scholarship.title}
         </h2>
-        <h4 className="text-sm">{scholarship.college.name}</h4>
+        <h4 className="text-sm text-center">{scholarship.college.name}</h4>
         <p className="font-light text-xs text-center">
           Ends at {scholarship.deadline?.toDateString()}
         </p>

@@ -11,6 +11,7 @@ import LoadingModal from "@/components/global/LoadingModal";
 import useEligibility from "../(actions)/useEligibility";
 import clsx from "clsx";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { updatedScholarshipClicks } from "../(actions)/action";
 
 const ViewScholarshipClient = ({
   scholarship,
@@ -45,6 +46,13 @@ const View = ({ scholarship }: { scholarship: FullScholarshipType }) => {
 
   function eligibleClassName(bool: boolean) {
     return clsx("", bool ? "text-green-500" : "");
+  }
+
+  async function addScholarClick() {
+    const res = await updatedScholarshipClicks(
+      scholarship.id,
+      scholarship.number_of_clicks
+    );
   }
 
   if (currentUser.isLoading || !currentUser.data) return <LoadingModal />;
@@ -90,6 +98,7 @@ const View = ({ scholarship }: { scholarship: FullScholarshipType }) => {
             <Button
               type="button"
               className="h-14 text-xl text-white font-bold w-80"
+              onClick={addScholarClick}
             >
               Apply Now
             </Button>

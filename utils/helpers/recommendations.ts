@@ -38,7 +38,7 @@ export const calculateEligibility = (
       (d) => d === criteria?.financialStatus
     );
 
-    if (userFinancial <= criteriaFinancial) {
+    if (userFinancial <= criteriaFinancial || criteriaFinancial === 0) {
       pts++;
       financeNeeds = true;
     }
@@ -84,7 +84,7 @@ export function checkFinancialApproval(
     (d) => d === baseCriteria?.financialStatus
   );
 
-  if (userFinancial <= criteriaFinancial) return true;
+  if (userFinancial <= criteriaFinancial || criteriaFinancial === 0) return true;
   else return false;
 }
 export function checkGPAApproval(
