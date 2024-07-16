@@ -75,7 +75,6 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
     }
 
     return scholarshipTab.map((scholarr: Element) => {
-
       const titleElement = scholarr.querySelector(
         "div.jltma-accordion-title-text"
       ) as HTMLElement;
@@ -95,12 +94,15 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
         "ul:nth-of-type(3), p:nth-of-type(8)"
       ) as HTMLElement;
 
-       // Extract the scholarship application form link   
-      const scholarformElement = scholarr.querySelector("li > span > a") as HTMLAnchorElement;
-      const clickformLink = scholarformElement && scholarformElement.textContent?.includes("CLICK HERE")
-      ? scholarformElement.href
-      : "N/A";
-    
+      // Extract the scholarship application form link
+      const scholarformElement = scholarr.querySelector(
+        "li > span > a"
+      ) as HTMLAnchorElement;
+      const clickformLink =
+        scholarformElement &&
+        scholarformElement.textContent?.includes("CLICK HERE")
+          ? scholarformElement.href
+          : "N/A";
 
       return {
         title: titleElement ? titleElement.innerText : "N/A",
@@ -111,7 +113,7 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
           : "N/A",
         deadline: deadlineElement ? deadlineElement.innerText : "N/A",
         url: "N/A",
-        formLink: clickformLink, 
+        formLink: clickformLink,
         gwa: gwaElement ? gwaElement.innerText : "N/A",
         financial: undefined,
         citizenship: undefined,
@@ -157,7 +159,7 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
     console.log("Created blank college!");
   }
 
-  console.log(url)
+  console.log(url);
 
   // Scrape the data
   const browser = await puppeteer.launch({ headless: true });
@@ -165,8 +167,10 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
   await page.goto(url);
 
   const scholarDataScrape = await page.evaluate(() => {
-    const scholarships = Array.from(document.querySelectorAll("#mCSB_2_container div:nth-of-type(n+3)"));
-  
+    const scholarships = Array.from(
+      document.querySelectorAll("#mCSB_2_container div:nth-of-type(n+3)")
+    );
+
     if (!scholarships || scholarships.length === 0) {
       console.log("No scholarship elements found.");
       return [];
@@ -174,28 +178,35 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
 
     const cleanText = (text: any) => {
       return text
-        .replace(/\n/g, ' ') // replace newlines with spaces
-        .replace(/\s\s+/g, ' ') // replace multiple spaces with a single space
-        .replace(/according to the following scheme:/g, '') // remove the specified phrase
-        .replace(/In addition, the scholars will enjoy the following/g, '') // remove specific phrase
+        .replace(/\n/g, " ") // replace newlines with spaces
+        .replace(/\s\s+/g, " ") // replace multiple spaces with a single space
+        .replace(/according to the following scheme:/g, "") // remove the specified phrase
+        .replace(/In addition, the scholars will enjoy the following/g, "") // remove specific phrase
         .trim(); // trim leading and trailing spaces
-        
     };
-  
-    const data = scholarships.map(scholarship => {
+
+    const data = scholarships.map((scholarship) => {
       const titleElement = scholarship.querySelector("a");
-      const title = titleElement ? cleanText(titleElement.textContent).trim() : "N/A";
-      const detailsElement = scholarship.querySelector(".panel-body p#pcontentwhite:nth-of-type(1)");
-      const details = detailsElement ? cleanText(detailsElement.textContent).trim() : "N/A";
-  
+      const title = titleElement
+        ? cleanText(titleElement.textContent).trim()
+        : "N/A";
+      const detailsElement = scholarship.querySelector(
+        ".panel-body p#pcontentwhite:nth-of-type(1)"
+      );
+      const details = detailsElement
+        ? cleanText(detailsElement.textContent).trim()
+        : "N/A";
+
       let criteria = "";
       let eligibility = "";
       let coverageType = "";
-      let extracurricularActivities =""
-  
-      const sections = Array.from(scholarship.querySelectorAll("p#titlewhite, p#pcontentwhite"));
-  
-      sections.forEach(section => {
+      let extracurricularActivities = "";
+
+      const sections = Array.from(
+        scholarship.querySelectorAll("p#titlewhite, p#pcontentwhite")
+      );
+
+      sections.forEach((section) => {
         const sectionTitle = cleanText(section.textContent);
 
         if (sectionTitle.includes("Benefits and Privileges")) {
@@ -206,19 +217,22 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
         }
 
         if (sectionTitle.includes("Other Requirements")) {
-          const extracurricularList = section.nextElementSibling?.nextElementSibling;
+          const extracurricularList =
+            section.nextElementSibling?.nextElementSibling;
           if (extracurricularList) {
-            extracurricularActivities = cleanText(extracurricularList.textContent);
+            extracurricularActivities = cleanText(
+              extracurricularList.textContent
+            );
           }
         }
-  
+
         if (sectionTitle.includes("Criteria/Qualifications")) {
           const criteriaList = section.nextElementSibling?.nextElementSibling;
           if (criteriaList) {
             criteria = cleanText(criteriaList.textContent);
           }
         }
-  
+
         if (sectionTitle.includes("Eligibility")) {
           const eligibilityList = section.nextElementSibling;
           if (eligibilityList) {
@@ -227,29 +241,31 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
         }
       });
 
-      const combinedEligibility = cleanText(`${criteria} ${eligibility}`.trim());
-  
+      const combinedEligibility = cleanText(
+        `${criteria} ${eligibility}`.trim()
+      );
+
       return {
         title,
         eligibility: combinedEligibility,
         coverageType,
         extracurricularActivities,
-        description:details, 
-        benefits:coverageType, 
-        deadline:"", 
-        url:"",
-        formLink:"", 
-        gwa:undefined, 
-        financial:undefined, 
-        citizenship:undefined
+        description: details,
+        benefits: coverageType,
+        deadline: "",
+        url: "",
+        formLink: "",
+        gwa: undefined,
+        financial: undefined,
+        citizenship: undefined,
       };
     });
-  
+
     return data;
   });
-  
+
   console.log(scholarDataScrape);
-  await browser.close()
+  await browser.close();
 
   let cleanedData = DataClean(scholarDataScrape, existingCollege?.id || "");
 
@@ -287,17 +303,18 @@ async function handleAteneoScrape(url: string, university: UniversityEnum) {
     console.log("Created blank college!");
   }
 
-  console.log(url)
+  console.log(url);
 
   // Scrape the data
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
   await page.goto(url);
 
-  const scholarDataScrape:Scraped[] = await page.evaluate(() => {
-   
-    const scholarships = Array.from(document.querySelectorAll("div.accordion-item"));
-  
+  const scholarDataScrape: Scraped[] = await page.evaluate(() => {
+    const scholarships = Array.from(
+      document.querySelectorAll("div.accordion-item")
+    );
+
     if (!scholarships || scholarships.length === 0) {
       console.log("No scholarship elements found.");
       return [];
@@ -305,28 +322,33 @@ async function handleAteneoScrape(url: string, university: UniversityEnum) {
 
     const cleanText = (text: any) => {
       return text
-        .replace(/\n/g, ' ') // replace newlines with spaces
-        .replace(/\s\s+/g, ' ') // replace multiple spaces with a single space
-        .replace(/according to the following scheme:/g, '') // remove the specified phrase
-        .replace(/In addition, the scholars will enjoy the following/g, '') // remove specific phrase
+        .replace(/\n/g, " ") // replace newlines with spaces
+        .replace(/\s\s+/g, " ") // replace multiple spaces with a single space
+        .replace(/according to the following scheme:/g, "") // remove the specified phrase
+        .replace(/In addition, the scholars will enjoy the following/g, "") // remove specific phrase
         .trim(); // trim leading and trailing spaces
-        
     };
-  
-    const data = scholarships.map(scholarship => {
+
+    const data = scholarships.map((scholarship) => {
       const titleElement = scholarship.querySelector("h4");
-      const title = titleElement ? cleanText(titleElement.textContent).trim() : "N/A";
+      const title = titleElement
+        ? cleanText(titleElement.textContent).trim()
+        : "N/A";
       const detailsElement = scholarship.querySelector("div.accordion-body");
-      const details = detailsElement ? cleanText(detailsElement.textContent).trim() : "N/A";
-  
+      const details = detailsElement
+        ? cleanText(detailsElement.textContent).trim()
+        : "N/A";
+
       let criteria = "";
       let eligibility = "";
       let coverageType = "";
-      let extracurricularActivities =""
-  
-      const sections = Array.from(scholarship.querySelectorAll("p#titlewhite, p#pcontentwhite"));
-  
-      sections.forEach(section => {
+      let extracurricularActivities = "";
+
+      const sections = Array.from(
+        scholarship.querySelectorAll("p#titlewhite, p#pcontentwhite")
+      );
+
+      sections.forEach((section) => {
         const sectionTitle = cleanText(section.textContent);
 
         if (sectionTitle.includes("Benefits and Privileges")) {
@@ -337,51 +359,55 @@ async function handleAteneoScrape(url: string, university: UniversityEnum) {
         }
 
         if (sectionTitle.includes("Other Requirements")) {
-          const extracurricularList = section.nextElementSibling?.nextElementSibling;
+          const extracurricularList =
+            section.nextElementSibling?.nextElementSibling;
           if (extracurricularList) {
-            extracurricularActivities = cleanText(extracurricularList.textContent);
+            extracurricularActivities = cleanText(
+              extracurricularList.textContent
+            );
           }
         }
-  
+
         if (sectionTitle.includes("Criteria/Qualifications")) {
           const criteriaList = section.nextElementSibling?.nextElementSibling;
           if (criteriaList) {
             criteria = cleanText(criteriaList.textContent);
           }
         }
-  
+
         if (sectionTitle.includes("Eligibility")) {
           const eligibilityList = section.nextElementSibling;
           if (eligibilityList) {
             eligibility = cleanText(eligibilityList.textContent);
-
           }
         }
       });
 
-      const combinedEligibility = cleanText(`${criteria} ${eligibility}`.trim());
-  
+      const combinedEligibility = cleanText(
+        `${criteria} ${eligibility}`.trim()
+      );
+
       return {
         title,
         eligibility: details,
         coverageType,
         extracurricularActivities,
-        description:details, 
-        benefits:details, 
-        deadline:"", 
-        url:"",
-        formLink:"", 
-        gwa:undefined, 
-        financial:undefined, 
-        citizenship:undefined
+        description: details,
+        benefits: details,
+        deadline: "",
+        url: "",
+        formLink: "",
+        gwa: undefined,
+        financial: undefined,
+        citizenship: undefined,
       };
     });
-  
+
     return data;
   });
-  
+
   console.log(scholarDataScrape);
-  await browser.close()
+  await browser.close();
 
   let cleanedData = DataClean(scholarDataScrape, existingCollege?.id || "");
 
@@ -400,9 +426,7 @@ async function handleAteneoScrape(url: string, university: UniversityEnum) {
     ]);
   }
   return cleanedData;
-
 }
-
 
 async function handleFEUScrape(url: string, university: UniversityEnum) {
   //Check first the college if in the database
@@ -538,7 +562,6 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
         console.log("Eligibility text:", text); // Debug logging
 
         if (text.includes("GWA")) {
-          
           let match = text.match(gwaRegex);
           if (match && match[1]) {
             gwa = match[1];
@@ -575,7 +598,7 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
         citizenship,
       };
 
-      console.log(newScholarship)
+      console.log(newScholarship);
 
       scholarDataScrape.push(newScholarship);
 
@@ -621,16 +644,16 @@ async function handleBrowseUniversity(university: UniversityEnum) {
         university
       );
 
-     case "Colegio de San Juan de Letran":
-        return handleLetranScrape(
-          "https://www.letran.edu.ph/Admission/Home",
-          university
-        );  
-        case "Ateneo de Manila University":
-          return handleAteneoScrape(
-            "https://www.ateneo.edu/college/scholarships/programs",
-            university
-          );  
+    case "Colegio de San Juan de Letran":
+      return handleLetranScrape(
+        "https://www.letran.edu.ph/Admission/Home",
+        university
+      );
+    case "Ateneo de Manila University":
+      return handleAteneoScrape(
+        "https://www.ateneo.edu/college/scholarships/programs",
+        university
+      );
     default:
       return [];
   }
@@ -642,17 +665,17 @@ export async function POST(request: Request) {
     const {} = body;
 
     const UNIVERSITIES: UniversityEnum[] = [
-       "De La Salle Benilde",
+      "De La Salle Benilde",
       "Far Eastern University",
-    "Colegio de San Juan de Letran",
-      "Ateneo de Manila University"
+      "Colegio de San Juan de Letran",
+      "Ateneo de Manila University",
     ];
 
     const allScholarships = await Promise.all(
       UNIVERSITIES.map((university) => handleBrowseUniversity(university))
     );
 
-    console.log(allScholarships)
+    console.log(allScholarships);
 
     return NextResponse.json("Success");
   } catch (error) {
@@ -680,6 +703,7 @@ function DataClean(
         coverageType: "",
         deadline: new Date(),
         formLink: element.formLink ? element.formLink : "",
+        number_of_clicks: 0,
       };
 
       let coverageType = parseCoverage(element.benefits);
@@ -703,8 +727,10 @@ function DataClean(
 
       newCriteria.financialStatus = parseFinancial(element.eligibility);
       newCriteria.grades = parseGPA(element.eligibility);
-      newCriteria.citizenship = parseCitizen(element.eligibility)
-      newCriteria.extracurricularActivities = parseExtraCurricular(element.benefits)
+      newCriteria.citizenship = parseCitizen(element.eligibility);
+      newCriteria.extracurricularActivities = parseExtraCurricular(
+        element.benefits
+      );
 
       return { newScholarship, newCriteria };
     });
@@ -713,31 +739,39 @@ function DataClean(
 }
 
 function parseCoverage(t: string): CoverageType | string {
-  if (t.toLocaleLowerCase().includes("full scholarship") || t.toLocaleLowerCase().includes("full tuition") || t.toLocaleLowerCase().includes("full discount") || t.toLocaleLowerCase().includes("100% tuition")) {
+  if (
+    t.toLocaleLowerCase().includes("full scholarship") ||
+    t.toLocaleLowerCase().includes("full tuition") ||
+    t.toLocaleLowerCase().includes("full discount") ||
+    t.toLocaleLowerCase().includes("100% tuition")
+  ) {
     return "Full Tuition";
-  } else if (t.toLocaleLowerCase().includes("partial scholarship") || t.toLocaleLowerCase().includes("tuition discounts")) {
+  } else if (
+    t.toLocaleLowerCase().includes("partial scholarship") ||
+    t.toLocaleLowerCase().includes("tuition discounts")
+  ) {
     return "Partial Tuition";
   } else {
     // nothing matches
     return "N/A";
   }
 }
-function parseFinancial(strEligibility:string):FinancialStatusType{
+function parseFinancial(strEligibility: string): FinancialStatusType {
   let monthlyIncomeRegex;
-  if(strEligibility.includes("monthly income")){
+  if (strEligibility.includes("monthly income")) {
     monthlyIncomeRegex = /monthly income.*?(\d[\d,]*)/;
 
     // Extract the nearest number to "monthly income"
     const incomeMatch = strEligibility.match(monthlyIncomeRegex);
-    
+
     if (incomeMatch) {
       return getFinancial(incomeMatch[1].split(",").join());
     } else {
-      console.log('No match found');
+      console.log("No match found");
     }
   }
 
-  return "Not Specified"
+  return "Not Specified";
 }
 function getFinancial(t: string | undefined): FinancialStatusType {
   if (!t) return "Not Specified";
@@ -751,76 +785,76 @@ function getFinancial(t: string | undefined): FinancialStatusType {
     return "Not Specified";
   }
 }
-function parseDeadline(strDeadline:string){
-  const dateRegex = /\b(?:January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}-\b(?:January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}/g;
+function parseDeadline(strDeadline: string) {
+  const dateRegex =
+    /\b(?:January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}-\b(?:January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}/g;
   const dates = strDeadline.match(dateRegex);
-  if(dates){
-    let singleDateStr = dates[0]
-    const firstDateRegex = /\b(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}/;
+  if (dates) {
+    let singleDateStr = dates[0];
+    const firstDateRegex =
+      /\b(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}/;
     const firstDateMatch = singleDateStr.match(firstDateRegex);
     if (firstDateMatch) {
-      let newDate = new Date(firstDateMatch[0])
-      newDate.setFullYear(new Date().getFullYear())
-      return newDate
+      let newDate = new Date(firstDateMatch[0]);
+      newDate.setFullYear(new Date().getFullYear());
+      return newDate;
     } else {
-      console.log('No match found');
+      console.log("No match found");
     }
   }
-  return new Date()
+  return new Date();
 }
-function parseGPA(strEligibility:string){
-  let gpaRegex
-  if(strEligibility.includes("Grade Point Average")){
+function parseGPA(strEligibility: string) {
+  let gpaRegex;
+  if (strEligibility.includes("Grade Point Average")) {
     gpaRegex = /Grade Point Average.*?(\d+)/;
 
     const gpaMatch = strEligibility.match(gpaRegex);
 
-  if (gpaMatch) {
-    return parseInt(gpaMatch[1])
-  } else {
-    console.log('No match found');
-    } 
-  }else if(strEligibility.includes("weighted average")){
+    if (gpaMatch) {
+      return parseInt(gpaMatch[1]);
+    } else {
+      console.log("No match found");
+    }
+  } else if (strEligibility.includes("weighted average")) {
     gpaRegex = /weighted average.*?(\d+)/;
 
     const gpaMatch = strEligibility.match(gpaRegex);
 
-  if (gpaMatch) {
-    return parseInt(gpaMatch[1])
-  } else {
-    console.log('No match found');
-    } 
+    if (gpaMatch) {
+      return parseInt(gpaMatch[1]);
+    } else {
+      console.log("No match found");
+    }
   }
-  return null
+  return null;
 }
-function parseCitizen(strEligibility:string){
-
-  let citizenshipRegex
+function parseCitizen(strEligibility: string) {
+  let citizenshipRegex;
   if (strEligibility.includes("citizen")) {
     // has citizen status
     citizenshipRegex = /(\w+)\s+citizen/i;
     let match = strEligibility.match(citizenshipRegex);
     if (match && match[1]) {
-      
       let ct = match[1];
 
-      let found = ["Filipino","American","Chinese"].find((t)=>ct.toLocaleLowerCase()===t.toLocaleLowerCase());
+      let found = ["Filipino", "American", "Chinese"].find(
+        (t) => ct.toLocaleLowerCase() === t.toLocaleLowerCase()
+      );
 
-      if(found){
+      if (found) {
         return found;
       }
-    
     }
   }
 
-  return null
+  return null;
 }
-function parseExtraCurricular(strEligibility:string){
-
-  let regex
+function parseExtraCurricular(strEligibility: string) {
+  let regex;
   if (strEligibility.includes("student-athletes")) {
-    return "Student Athlete"
+    return "Student Athlete";
   }
 
-  return null
+  return null;
 }

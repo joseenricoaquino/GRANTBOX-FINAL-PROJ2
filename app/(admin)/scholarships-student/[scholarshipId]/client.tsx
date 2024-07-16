@@ -91,7 +91,7 @@ const View = ({ scholarship }: { scholarship: FullScholarshipType }) => {
             {scholarship.title}
           </p>
           <Link
-            href={college?.webLink || ""}
+            href={scholarship?.formLink || ""}
             target="_blank"
             className="flex justify-center items-center"
           >
