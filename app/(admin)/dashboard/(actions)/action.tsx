@@ -33,8 +33,8 @@ export const getTrending = async () => {
 };
 
 const templateParams = {
-  from_name: "kielo.mercado04@gmail.com",
-  to_name: "Kels",
+  from_name: "coyaquino30@gmail.com",
+  to_name: "Coy",
   message: "Hello",
 };
 
