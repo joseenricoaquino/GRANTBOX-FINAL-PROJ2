@@ -41,14 +41,14 @@ const ActionCell = ({ row }: { row: User }) => {
         >
           Remove Account
         </DropdownMenuItem>
-        <DropdownMenuItem
+        {/* <DropdownMenuItem
           onClick={() => {
             setSelected(row);
             setToggleEdit(true);
           }}
         >
           Edit Account
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );

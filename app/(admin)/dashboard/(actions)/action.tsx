@@ -56,3 +56,19 @@ export const sendEmail = async () => {
     console.log(error);
   }
 };
+
+export const getDataScholars = async () => {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) return [];
+  if (currentUser.role === "STUDENT") return [];
+
+  const data = await prisma.user.findMany({
+    where: {
+      role: "STUDENT",
+    },
+    select: { id: true, email: true, name: true },
+    take: 5,
+  });
+  return data;
+};

@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
@@ -18,8 +19,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import ScrapeCard from "../scrape-card";
+import useScholars from "../../(actions)/useScholars";
 
 export default function AdminMainTemplate() {
+  const scholars = useScholars();
+  console.log(scholars);
   return (
     <main className="flex flex-1 flex-col gap-4 mb-4">
       <div className="grid gap-4 grid-cols-3">
@@ -44,31 +48,27 @@ export default function AdminMainTemplate() {
                 <TableRow>
                   <TableHead>Scholar</TableHead>
                   <TableHead className="hidden xl:table-column">Type</TableHead>
-                  <TableHead className="hidden xl:table-column">
+                  {/* <TableHead className="hidden xl:table-column">
                     Status
-                  </TableHead>
-                  <TableHead className="text-right">Date</TableHead>
+                  </TableHead> */}
+                  {/* <TableHead className="text-right">Date</TableHead> */}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {/* <TableRow>
-                  <TableCell>
-                    <div className="font-medium">Liam Johnson</div>
-                    <div className="hidden text-sm text-muted-foreground md:inline">
-                      liam@example.com
+                {scholars.data?.map((sc) => {
+                  return (
+                    <div className="" key={sc.id}>
+                      <TableRow>
+                        <TableCell>
+                          <div className="font-medium">{sc.name}</div>
+                          <div className="hidden text-sm text-muted-foreground md:inline">
+                            {sc.email}
+                          </div>
+                        </TableCell>
+                      </TableRow>
                     </div>
-                  </TableCell>
-                  <TableCell className="hidden xl:table-column">Sale</TableCell>
-                  <TableCell className="hidden xl:table-column">
-                    <Badge className="text-xs" variant="outline">
-                      Approved
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                    2023-06-23
-                  </TableCell>
-                  <TableCell className="text-right">N/A</TableCell>
-                </TableRow> */}
+                  );
+                })}
               </TableBody>
             </Table>
           </CardContent>
