@@ -142,17 +142,32 @@ const AuthLoginForm = () => {
           </Button>
         </form>
       </Form>
-      <div className="flex gap-2 justify-center items-center text-xs mx-auto">
-        {`Don't have an account yet?`}{" "}
-        <Button
-          variant={"link"}
-          className="text-black text-xs p-0"
-          onClick={() => {
-            router.push("/sign-up");
-          }}
-        >
-          Create an account!{" "}
-        </Button>
+      <div className="flex gap-2 flex-col justify-center items-center text-xs mx-auto">
+        <div className="">
+          {`Don't have an account yet?`}{" "}
+          <Button
+            variant={"link"}
+            className="text-black text-xs p-0"
+            onClick={() => {
+              router.push("/sign-up");
+            }}
+          >
+            Create an account!{" "}
+          </Button>
+        </div>
+
+        <div className="">
+          {`Forgot Password?`}{" "}
+          <Button
+            variant={"link"}
+            className="text-black text-xs p-0"
+            onClick={() => {
+              router.push("/forgot-password");
+            }}
+          >
+           Click Here!{" "}
+          </Button>
+        </div>
       </div>
       {/* <div className="flex gap-2 justify-center items-center text-xs mx-auto">
         {isAdmin ? "Are you logging in as a student?" : "Are you an admin?"}

@@ -21,6 +21,8 @@ const getCurrentUser = async () => {
         nationality: true,
         studentBackground: true,
         studentCriteria: true,
+        qna:true,
+        answer:true,
       },
     });
 

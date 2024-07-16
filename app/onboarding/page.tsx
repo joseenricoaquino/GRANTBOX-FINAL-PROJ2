@@ -30,7 +30,9 @@ import {
 import { Label } from "@/components/ui/label";
 import { EducationalLevelEnum, FinancialStatusEnum } from "@/utils/types";
 import { Separator } from "@/components/ui/separator";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import useCurrentUser from "@/actions/useCurrentUser";
+import { Loader2 } from "lucide-react";
 
 const OnboardingMain = () => {
   const {

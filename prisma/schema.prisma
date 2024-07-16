@@ -35,6 +35,10 @@ model User {
   studentCriteria   StudentCriteria?
   studentBackground StudentBackground?
   forms             Form[]
+
+  // password
+  qna String?
+  answer String?
 }
 
 model Form {
@@ -144,6 +148,9 @@ model Scholarship {
   formLink        String?
 
   criteria Criteria?
+
+  //Clicks
+  number_of_clicks Int @default(0)
 }
 
 model Criteria {
