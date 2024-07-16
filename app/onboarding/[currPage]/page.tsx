@@ -316,7 +316,7 @@ const OnboardingPaging = (props: IParams) => {
             </p>
           </div>
 
-          <div className="items-top flex space-x-2">
+          {/* <div className="items-top flex space-x-2">
             <Checkbox
               id="terms1"
               checked={isNewScholarship}
@@ -337,7 +337,7 @@ const OnboardingPaging = (props: IParams) => {
                 profile. (Up to 7 notifications in a busy week)
               </p>
             </div>
-          </div>
+          </div> */}
           <div className="items-top flex space-x-2">
             <Checkbox
               id="terms2"

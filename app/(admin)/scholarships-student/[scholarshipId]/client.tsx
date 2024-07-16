@@ -201,12 +201,12 @@ const View = ({ scholarship }: { scholarship: FullScholarshipType }) => {
                             Ends at:{" "}
                             {scholarship.deadline?.toLocaleDateString()}
                           </div>
-                          <p className="line-clamp-3 text-xl font-normal mt-10">
+                          <p className="text-sm font-normal mt-10 text-wrap">
                             {scholarship.title}
                           </p>
                           <div className="flex flex-col gap-1 w-full">
                             <div className="flex justify-start items-center gap-1">
-                              <div className="rounded-full p-1.5 bg-white border-2 text-xs font-semibold text-center">
+                              <div className="line-clamp-1 rounded-full p-1.5 bg-white border-2 text-xs font-semibold text-center">
                                 {scholarship.scholarshipType}
                               </div>
                               <div className="rounded-full p-1.5 bg-white border-2 text-xs font-semibold text-center">

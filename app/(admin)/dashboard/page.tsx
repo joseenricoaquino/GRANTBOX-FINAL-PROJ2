@@ -8,8 +8,11 @@ const MainPage = async () => {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) redirect("/");
-  if(!currentUser.qna || !currentUser.answer)
-    redirect("/security")
+  if (
+    (!currentUser.qna || !currentUser.answer) &&
+    currentUser.role === "STUDENT"
+  )
+    redirect("/security");
   if (
     (!currentUser.studentBackground || !currentUser.studentCriteria) &&
     currentUser.role === "STUDENT"

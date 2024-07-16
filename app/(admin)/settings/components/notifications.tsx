@@ -71,7 +71,7 @@ const NotificationsClient = ({ currentUser }: { currentUser: User }) => {
 
   return (
     <div className="flex flex-col w-full max-w-screen-sm gap-6 h-full mt-8">
-      <div className="items-top flex space-x-2">
+      {/* <div className="items-top flex space-x-2">
         <Checkbox
           checked={newScholar}
           onCheckedChange={(e) => {
@@ -92,7 +92,7 @@ const NotificationsClient = ({ currentUser }: { currentUser: User }) => {
             profile. (Up to 7 notifications in a busy week)
           </p>
         </div>
-      </div>
+      </div> */}
       <div className="items-top flex space-x-2">
         <Checkbox
           checked={scholarDeadline}
