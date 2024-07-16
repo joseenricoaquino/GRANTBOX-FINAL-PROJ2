@@ -17,6 +17,21 @@ export const getViewScholarship = async () => {
   return data as FullScholarshipType[];
 };
 
+export const getTrending = async () => {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) return [];
+
+  const data = await prisma.scholarship.findMany({
+    orderBy: {
+      number_of_clicks: "desc",
+    },
+    take: 10,
+    select: { id: true, number_of_clicks: true, title: true },
+  });
+  return data;
+};
+
 const templateParams = {
   from_name: "kielo.mercado04@gmail.com",
   to_name: "Kels",
