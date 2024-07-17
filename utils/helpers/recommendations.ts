@@ -79,12 +79,13 @@ export function checkFinancialApproval(
 ): boolean {
   const userFinancial = FinancialStatusEnum.findIndex(
     (d) => d === userCriteria?.financialStatus
-  );
+  );//1 - index
   const criteriaFinancial = FinancialStatusEnum.findIndex(
     (d) => d === baseCriteria?.financialStatus
-  );
+  ); //0 - index
 
   if (userFinancial <= criteriaFinancial || criteriaFinancial === 0) return true;
+  // if (userFinancial <= criteriaFinancial) return true;
   else return false;
 }
 export function checkGPAApproval(

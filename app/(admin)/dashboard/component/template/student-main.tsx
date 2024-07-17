@@ -28,7 +28,7 @@ export default function StudentMainTemplate({
 }: {
   currentUser: FullStudentType;
 }) {
-  return <TestNotif />;
+  // return <TestNotif />;
 
   const recommended = useScholarshipRecommended(currentUser);
 
