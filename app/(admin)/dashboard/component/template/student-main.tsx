@@ -21,12 +21,15 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import emailjs from "@emailjs/browser";
 import { useCallback, useEffect } from "react";
 import { IsScholarNearing } from "@/utils/helpers/date";
+import TestNotif from "./test-notif";
 
 export default function StudentMainTemplate({
   currentUser,
 }: {
   currentUser: FullStudentType;
 }) {
+  return <TestNotif />;
+
   const recommended = useScholarshipRecommended(currentUser);
 
   // Define sendEmail inside useCallback
@@ -60,7 +63,7 @@ export default function StudentMainTemplate({
   console.log(recommended);
   useEffect(() => {
     if (recommended && recommended.data) {
-      const toNotif = recommended.data
+      let toNotif = recommended.data
         .map((d) => {
           const scholarDl = d.scholarship.deadline as Date | undefined;
           if (scholarDl) {
@@ -71,16 +74,53 @@ export default function StudentMainTemplate({
         })
         .filter((d) => d !== undefined);
 
-      if (toNotif.length > 0) {
-        // has something to notify
-        let key = `deadlineNotif1:${new Date().toLocaleDateString()}`;
-        const item = window.localStorage.getItem(key);
+      toNotif.push({
+        scholarship: {
+          id: "6695942a08edeaa99ccf1376",
+          collegeId: "66958769489a396df6c0c417",
+          title: "HONOR'S LIST",
+          details:
+            "Any college student of the Colegio, with meritorious performance in a given semester, qualifies for inclusion in the Honor's List (Dean's List) and discounts on tuition fee for the immediately succeeding semester.",
+          scholarshipType: "N/A",
+          coverageType: "Partial Tuition",
+          deadline: new Date("2024-07-15T21:27:06.000Z"),
+          formLink: "",
+          number_of_clicks: 2,
+          college: {
+            id: "66958769489a396df6c0c417",
+            image: null,
+            location: "N/A",
+            details: "N/A",
+            name: "Colegio de San Juan de Letran",
+            webLink: null,
+          },
+          criteria: {
+            id: "6695942a08edeaa99ccf1377",
+            scholarshipId: "6695942a08edeaa99ccf1376",
+            grades: 90,
+            financialStatus: "Not Specified",
+            prevSchool: null,
+            location: null,
+            citizenship: null,
+            extracurricularActivities: null,
+            courseInterest: null,
+          },
+        },
+        eligibilityScore: 1,
+      });
+      console.log(toNotif);
+      console.log(toNotif.length);
 
-        if (!item) {
-          // Now sendEmail is wrapped in useCallback
-          sendEmail(key, toNotif);
-        } else console.log("Already sent email");
-      }
+      // if (toNotif.length > 0) {
+      //   // has something to notify
+      //   let key = `deadlineNotif1:${new Date().toLocaleDateString()}`;
+      //   const item = window.localStorage.getItem(key);
+
+      //   if (!item) {
+      //     // Now sendEmail is wrapped in useCallback
+      //     sendEmail(key, toNotif);
+      //   } else console.log("Already sent email");
+      // }
     }
   }, [recommended, sendEmail]);
 
