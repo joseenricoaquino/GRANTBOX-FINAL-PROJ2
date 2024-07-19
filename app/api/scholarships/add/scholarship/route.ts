@@ -43,6 +43,7 @@ export async function POST(request: Request) {
         coverageType,
         deadline: new Date(deadline),
         formLink,
+        sourceType: "MANUAL",
       },
     });
 

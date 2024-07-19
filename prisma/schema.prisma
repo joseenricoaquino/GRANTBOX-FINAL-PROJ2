@@ -37,7 +37,7 @@ model User {
   forms             Form[]
 
   // password
-  qna String?
+  qna    String?
   answer String?
 }
 
@@ -146,6 +146,7 @@ model Scholarship {
   coverageType    String
   deadline        DateTime?
   formLink        String?
+  sourceType      String
 
   criteria Criteria?
 

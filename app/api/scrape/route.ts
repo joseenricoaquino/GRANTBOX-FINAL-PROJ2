@@ -129,7 +129,8 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id },
+        where: { collegeId: existingCollege?.id, sourceType: "SCRAPED"},
+      
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -617,7 +618,7 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id || "" },
+        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED" },
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -703,6 +704,7 @@ function DataClean(
         coverageType: "",
         deadline: new Date(),
         formLink: element.formLink ? element.formLink : "",
+        sourceType: "SCRAPED",
         number_of_clicks: 0,
       };
 
