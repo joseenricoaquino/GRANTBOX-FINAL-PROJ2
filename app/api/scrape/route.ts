@@ -667,9 +667,9 @@ export async function POST(request: Request) {
 
     const UNIVERSITIES: UniversityEnum[] = [
       "De La Salle Benilde",
-      "Far Eastern University",
-      "Colegio de San Juan de Letran",
-      "Ateneo de Manila University",
+     // "Far Eastern University",
+     // "Colegio de San Juan de Letran",
+     // "Ateneo de Manila University",
     ];
 
     const allScholarships = await Promise.all(
