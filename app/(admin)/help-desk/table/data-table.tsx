@@ -33,6 +33,8 @@ interface DataTableProps<TData, TValue> {
 import { DataTableToolbar } from "./data-toolbar";
 import { DataTablePagination } from "./pagination";
 import { useHelpDeskContext } from "../provider";
+import { DeleteModal } from "../components/delete";
+import { EditModal } from "../components/edit";
 
 export function DataTable<TData, TValue>({
   columns,
@@ -73,7 +75,8 @@ export function DataTable<TData, TValue>({
   const { selected, toggleDelete, toggleEdit } = useHelpDeskContext();
   return (
     <>
-      {/* {selected && toggleDelete && <DeleteModal />} */}
+      {selected && toggleDelete && <DeleteModal />}
+      {selected && toggleEdit && <EditModal />}
       <div className="w-full h-full flex flex-col justify-between">
         <div className="">
           <div className="flex items-center py-4 justify-between">
