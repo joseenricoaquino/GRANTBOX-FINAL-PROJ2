@@ -7,8 +7,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { id } = body;
 
-    console.log(id);
-
     await prisma.fAQ.delete({ where: { id } });
 
     return NextResponse.json({ response: "Deleted Successfully" });

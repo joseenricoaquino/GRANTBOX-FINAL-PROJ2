@@ -40,7 +40,8 @@ const ChatButton = () => {
     e.preventDefault();
     const newConvo = faqs.data?.find((d) => d.id === question);
     if (newConvo) {
-      setConvo((prev) => [newConvo, ...prev]);
+      let newCon = [...convo, newConvo];
+      setConvo(newCon);
     }
     setQuestion("");
   }
@@ -61,18 +62,18 @@ const ChatButton = () => {
           </Button>
 
           <h2 className="font-bold text-main-500">Help Desk</h2>
-          <ul className="flex-1 flex flex-col-reverse gap-2">
-            {convo.map((val) => {
+          <ul className="w-full space-y-1 h-full overflow-auto">
+            {convo.map((d, idx) => {
               return (
-                <li key={val.id} className="flex flex-col gap-2">
-                  <div className="flex-1 flex justify-end items-center">
+                <li className="grid gap-1" key={idx}>
+                  <div className="flex justify-end items-center">
                     <p className="p-2 rounded-md bg-blue-400 text-left text-xs">
-                      {val.question}
+                      {d.question}
                     </p>
                   </div>
-                  <div className="flex-1 flex justify-start items-center">
+                  <div className="flex justify-start items-center">
                     <p className="p-2 rounded-md bg-slate-300 text-right text-xs">
-                      {val.response}
+                      {d.response}
                     </p>
                   </div>
                 </li>
