@@ -274,7 +274,7 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id || "" },
+        where: { collegeId: existingCollege?.id, sourceType: "SCRAPED"},
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -307,7 +307,7 @@ async function handleAteneoScrape(url: string, university: UniversityEnum) {
   console.log(url);
 
   // Scrape the data
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
   await page.goto(url);
 
@@ -416,7 +416,7 @@ async function handleAteneoScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id || "" },
+        where: { collegeId: existingCollege?.id, sourceType: "SCRAPED"},
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -618,7 +618,7 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED" },
+        where: { collegeId: existingCollege?.id, sourceType: "SCRAPED"},
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -667,9 +667,9 @@ export async function POST(request: Request) {
 
     const UNIVERSITIES: UniversityEnum[] = [
       "De La Salle Benilde",
-     // "Far Eastern University",
-     // "Colegio de San Juan de Letran",
-     // "Ateneo de Manila University",
+     "Far Eastern University",
+     "Colegio de San Juan de Letran",
+     "Ateneo de Manila University",
     ];
 
     const allScholarships = await Promise.all(

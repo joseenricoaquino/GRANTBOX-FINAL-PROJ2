@@ -1,0 +1,14 @@
+(profile)
+dashboard
+profile
+
+[name]
+
+localhost:3000/profile/cocoy?filter=all
+localhost:3000/profile/kels
+localhost:3000/profile/sid
+
+
+localhost:3000/profile/0fghjeuak73kafk62k
+
+
