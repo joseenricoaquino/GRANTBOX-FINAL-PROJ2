@@ -51,9 +51,11 @@ import useExistingCollege from "./(action)/useGetAttendances";
 import Link from "next/link";
 import { Textarea } from "@/components/ui/textarea";
 import { CITIES, CITIZENSHIP, CLUBS } from "@/constants";
+import FormInput from "@/app/(admin)/scholarships-compass/components/form-input";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "" }),
+  title: z.string().min(1, { message: "" }),
   details: z.string().min(1, { message: "" }),
   deadline: z.string().min(1, { message: "" }),
   scholarshipType: z.string().min(1, { message: "" }),
@@ -75,6 +77,7 @@ type FormValues = z.infer<typeof formSchema>;
 // This can come from your database or API.
 const defaultValues: Partial<FormValues> = {
   name: "",
+  title: "",
   details: "",
   scholarshipType: "",
   coverageType: "",
@@ -117,7 +120,6 @@ export default function AddScholarshipPage() {
         }
       })
       .catch((error) => {
-        console.log(error.request.response);
         toast({
           title: "Unexpected error!",
           variant: "destructive",
@@ -202,6 +204,16 @@ export default function AddScholarshipPage() {
                 <h4 className="text-sm font-medium h-6">
                   Scholarship Information
                 </h4>
+                <div className="col-span-2">
+                  <FormInput
+                    control={form.control}
+                    name="title"
+                    label="Scholarship Title"
+                    isLoading={isLoading}
+                    className=""
+                    placeholder="Enter the name of the scholarship"
+                  />
+                </div>
                 <div className="col-span-2 grid grid-cols-2 gap-4">
                   <div className="grid gap-6">
                     <FormField

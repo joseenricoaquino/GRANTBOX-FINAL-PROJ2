@@ -7,8 +7,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       scholarshipType,
+      title,
       details,
-      collegeName: name,
+      name,
       coverageType,
       formLink,
       deadline,
@@ -22,11 +23,13 @@ export async function POST(request: Request) {
       fos,
     } = body;
 
+
     let existingCollege = await prisma.college.findFirst({
       where: {
         name,
       },
     });
+
 
     if (!existingCollege) {
       return new NextResponse("No Existing College in the Database", {
@@ -37,7 +40,7 @@ export async function POST(request: Request) {
     const newScholarship = await prisma.scholarship.create({
       data: {
         college: { connect: { id: existingCollege.id } },
-        title: "",
+        title,
         details,
         scholarshipType,
         coverageType,
@@ -46,6 +49,8 @@ export async function POST(request: Request) {
         sourceType: "MANUAL",
       },
     });
+
+    console.log(newScholarship);
 
     const newCritera = await prisma.criteria.create({
       data: {
