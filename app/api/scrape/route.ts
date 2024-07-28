@@ -597,7 +597,7 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
         benefits: benefits.join(" ").replace(/\n/g, " ").trim(),
         eligibility: eligibility.join(" ").replace(/\n/g, " ").trim(),
         url: scholarship.url,
-        formLink: existingScholarship ? existingScholarship.formLink : "NA",
+        formLink: "",
         deadline: "N/A",
         gwa,
         financial,
