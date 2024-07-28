@@ -1,14 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getData } from "./action";
-import {
-  FullScholarshipType,
-  FullStudentType,
-  ScholarFilterType,
-} from "@/utils/interfaces";
+import { FullScholarshipType, FullStudentType } from "@/utils/interfaces";
 import { useSearchParams } from "next/navigation";
-import filterEligibleScholarships from "../../dashboard/(actions)/useFilterEligibleScholarships";
 import { Criteria } from "@prisma/client";
 import {
   checkCitizenshipApproval,
@@ -18,22 +12,27 @@ import {
   checkResidencyApproval,
   countNonNullProperties,
 } from "@/utils/helpers/recommendations";
+import { getViewScholarship } from "../../dashboard/(actions)/action";
 
 const useAllScholarships = (userInfo: FullStudentType) => {
   const searchParams = useSearchParams();
-
-  const filter: ScholarFilterType = {
-    name: searchParams.get("name") || "",
-    coverage: searchParams.get("coverage") || "",
-    category: searchParams.get("category") || "",
-    from: searchParams.get("from") || "",
-    to: searchParams.get("to") || "",
-  };
+  let name = searchParams.get("name") || "";
+  let coverage = searchParams.get("coverage") || "";
+  let category = searchParams.get("category") || "";
+  let from = undefined;
+  let to = undefined;
 
   const { data, isLoading } = useQuery({
-    queryKey: [`scholarship:all`],
+    queryKey: [`scholarship:all`, name, coverage, category, from, to],
+    enabled: userInfo !== undefined,
     queryFn: async () => {
-      const scholarships = (await getData(filter)) as any[];
+      const scholarships = await getViewScholarship({
+        name,
+        coverage,
+        category,
+        from,
+        to,
+      });
 
       let wtScore = getEligilbilityScore(userInfo, scholarships);
 

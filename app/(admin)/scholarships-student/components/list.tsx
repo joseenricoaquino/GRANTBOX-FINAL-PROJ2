@@ -6,13 +6,7 @@ import ScholarshipCard from "./card";
 import useScholarshipRecommended from "../../dashboard/(actions)/useScholarshipRecommended";
 import useAllScholarships from "../(actions)/useAllScholarships";
 
-const ScholarshipList = ({
-  initialData,
-  currentUser,
-}: {
-  initialData: FullScholarshipType[];
-  currentUser: FullStudentType;
-}) => {
+const ScholarshipList = ({ currentUser }: { currentUser: FullStudentType }) => {
   const recommended = useScholarshipRecommended(currentUser);
   const all = useAllScholarships(currentUser);
   return (

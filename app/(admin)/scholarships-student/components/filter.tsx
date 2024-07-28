@@ -138,7 +138,7 @@ const Filter = () => {
         <Separator className="my-4" />
 
         {/* DEADLINE RANGE */}
-        <div className="flex justify-center items-center w-full flex-col gap-1">
+        {/* <div className="flex justify-center items-center w-full flex-col gap-1">
           <Label className="w-full text-left">Deadline Range</Label>
           <div className={cn("grid gap-2 w-full")}>
             <Popover>
@@ -178,10 +178,10 @@ const Filter = () => {
               </PopoverContent>
             </Popover>
           </div>
-        </div>
+        </div> */}
 
         {/* Coverage */}
-        <div className="mt-6 w-full">
+        <div className="mt-0 w-full">
           <Collapsible
             open={isOpenCoverage}
             onOpenChange={setIsOpenCoverage}

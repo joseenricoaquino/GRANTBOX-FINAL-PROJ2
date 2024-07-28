@@ -5,15 +5,68 @@ import { FullScholarshipType } from "@/utils/interfaces";
 
 import emailjs from "@emailjs/browser";
 
-export const getViewScholarship = async () => {
+export const getViewScholarship = async ({
+  name,
+  coverage,
+  category,
+  from,
+  to,
+}: {
+  name: string;
+  coverage: string;
+  category: string;
+  from: string | undefined;
+  to: string | undefined;
+}) => {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) return [];
 
+  const whereClause: any = {};
+
+  let coverageArr = coverage.split(",").filter((val) => val !== "");
+  let categoryArr = category.split(",").filter((val) => val !== "");
+
+  if (name) {
+    whereClause.title = {
+      contains: name,
+      mode: "insensitive", // case-insensitive filtering
+    };
+  }
+
+  if (coverageArr.length > 0) {
+    whereClause.OR = [
+      ...coverageArr.map((coverageType) => ({
+        coverageType,
+      })),
+    ];
+  }
+
+  if (categoryArr.length > 0) {
+    if (!whereClause.OR) whereClause.OR = [];
+    whereClause.OR = [
+      ...whereClause.OR,
+      ...categoryArr.map((scholarshipType) => ({
+        scholarshipType,
+      })),
+    ];
+  }
+
+  if (from && to) {
+    whereClause.deadline = {};
+    if (from) {
+      whereClause.deadline.gte = new Date(from);
+    }
+    if (to) {
+      whereClause.deadline.lte = new Date(to);
+    }
+  }
+
   const data = await prisma.scholarship.findMany({
-    where: {},
+    where: whereClause,
     include: { college: true, criteria: true },
   });
+
   return data as FullScholarshipType[];
 };
 
