@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getViewScholarship, sendEmail } from "./action";
+import { getViewScholarship } from "./action";
 import { FullStudentType } from "@/utils/interfaces";
 import filterEligibleScholarships from "./useFilterEligibleScholarships";
 

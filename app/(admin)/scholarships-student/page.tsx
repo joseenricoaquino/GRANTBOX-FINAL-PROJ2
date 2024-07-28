@@ -16,6 +16,7 @@ const ScholarshipsStudentPage = async (props: IParams) => {
   const currentUser = await getCurrentUser();
 
   if (currentUser?.role !== "STUDENT") redirect("/dashboard");
+  
 
   const initialData = await getData(props.searchParams);
 

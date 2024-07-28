@@ -15,11 +15,11 @@ export type FullScholarshipType = Scholarship & {
   criteria: Criteria;
 };
 export type ScholarFilterType = {
-  name: string | undefined;
-  coverage: string | undefined;
-  category: string | undefined;
-  from: string | undefined;
-  to: string | undefined;
+  name: string | undefined | null;
+  coverage: string | undefined | null;
+  category: string | undefined | null;
+  from: string | undefined | null;
+  to: string | undefined | null;
 };
 export type FullStudentType = User & {
   studentCriteria: StudentCriteria;

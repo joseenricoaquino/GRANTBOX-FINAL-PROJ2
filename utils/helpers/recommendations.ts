@@ -1,7 +1,6 @@
 import { Criteria, StudentCriteria, User } from "@prisma/client";
 import { FinancialStatusEnum, ScholarshipMapping } from "../types";
 
-
 export const calculateEligibility = (
   userInfo: any,
   userBackground: any,
@@ -38,7 +37,11 @@ export const calculateEligibility = (
       (d) => d === criteria?.financialStatus
     );
 
-    if (userFinancial <= criteriaFinancial || criteriaFinancial === 0) {
+    // if (userFinancial <= criteriaFinancial || criteriaFinancial === 0) {
+    //   pts++;
+    //   financeNeeds = true;
+    // }
+    if (userFinancial <= criteriaFinancial) {
       pts++;
       financeNeeds = true;
     }
@@ -46,11 +49,11 @@ export const calculateEligibility = (
       pts++;
       inGPA = true;
     }
-    if (userInfo.address === criteria.location) {
+    if (userInfo.address === criteria?.location) {
       pts++;
       sameLocation = true;
     }
-    if (userInfo.nationality === criteria.citizenship) {
+    if (userInfo.nationality === criteria?.citizenship) {
       pts++;
       sameNationality = true;
     }
@@ -79,13 +82,15 @@ export function checkFinancialApproval(
 ): boolean {
   const userFinancial = FinancialStatusEnum.findIndex(
     (d) => d === userCriteria?.financialStatus
-  );//1 - index
+  ); //1 - index
   const criteriaFinancial = FinancialStatusEnum.findIndex(
     (d) => d === baseCriteria?.financialStatus
   ); //0 - index
 
-  if (userFinancial <= criteriaFinancial || criteriaFinancial === 0) return true;
-  // if (userFinancial <= criteriaFinancial) return true;
+  //Meaning not spcified
+  if (criteriaFinancial === 0) return false;
+  // if (userFinancial <= criteriaFinancial || criteriaFinancial === 0) return true;
+  if (userFinancial <= criteriaFinancial) return true;
   else return false;
 }
 export function checkGPAApproval(
@@ -100,7 +105,7 @@ export function checkResidencyApproval(
   userInfo: Partial<User>,
   baseCriteria: Criteria
 ): boolean {
-  if (userInfo.address === baseCriteria.location) {
+  if (userInfo?.address === baseCriteria?.location) {
     return true;
   } else return false;
 }
@@ -108,7 +113,7 @@ export function checkCitizenshipApproval(
   userInfo: Partial<User>,
   baseCriteria: Criteria
 ): boolean {
-  if (userInfo.nationality === baseCriteria.citizenship) {
+  if (userInfo?.nationality === baseCriteria?.citizenship) {
     return true;
   } else return false;
 }
@@ -125,13 +130,17 @@ export function checkFieldOfStudyApproval(
 
 export function countNonNullProperties(criteria: Criteria): number {
   let count = 0;
+  if (!criteria) return count;
+
   for (const [key, value] of Object.entries(criteria)) {
     if (
       key !== "id" &&
       key !== "scholarshipId" &&
       key !== "prevSchool" &&
       value !== null &&
-      value !== ""
+      value !== undefined &&
+      value !== "" &&
+      value !== "Not Specified"
     ) {
       count++;
     }
