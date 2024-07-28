@@ -162,11 +162,6 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
 
   console.log(url);
 
-    // Fetch existing manually added scholarships
-    const manualScholarships = await prisma.scholarship.findMany({
-      where: { collegeId: existingCollege?.id || "", sourceType: "MANUAL" },
-    });
-
   // Scrape the data
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
@@ -287,11 +282,9 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
       prisma.criteria.createMany({
         data: cleanedData.map((d) => d.newCriteria),
       }),
-      prisma.scholarship.createMany({
-        data: manualScholarships,
-      }),
     ]);
   }
+
   return cleanedData;
 }
 
