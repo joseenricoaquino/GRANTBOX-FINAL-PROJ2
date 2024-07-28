@@ -129,7 +129,7 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id, sourceType: "SCRAPED"},
+        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED"},
       
       }),
       prisma.scholarship.createMany({
@@ -274,7 +274,7 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id, sourceType: "SCRAPED"},
+        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED"},
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -416,7 +416,7 @@ async function handleAteneoScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id, sourceType: "SCRAPED"},
+        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED"},
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -618,7 +618,7 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id, sourceType: "SCRAPED"},
+        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED"},
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -666,7 +666,7 @@ export async function POST(request: Request) {
     const {} = body;
 
     const UNIVERSITIES: UniversityEnum[] = [
-      "De La Salle Benilde",
+     "De La Salle Benilde",
      "Far Eastern University",
      "Colegio de San Juan de Letran",
      "Ateneo de Manila University",
