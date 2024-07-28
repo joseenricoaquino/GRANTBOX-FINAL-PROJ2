@@ -21,7 +21,7 @@ interface Scraped {
   eligibility: string;
   deadline: string;
   url: string;
-  formLink: string | null;
+  formLink: string;
   gwa: string | undefined;
   financial: string | undefined;
   citizenship: string | undefined;
@@ -284,7 +284,6 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
       }),
     ]);
   }
-
   return cleanedData;
 }
 
@@ -476,11 +475,6 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
 
   console.log(scholarshipData);
 
-    // Fetch existing scholarships for merging
-    const existingScholarships = await prisma.scholarship.findMany({
-      where: { collegeId: existingCollege?.id, sourceType: "SCRAPED" },
-    });
-
   for (const scholarship of scholarshipData) {
     try {
       //console.log(`Navigating to URL: ${scholarship.url}`);
@@ -555,6 +549,10 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
       console.log(`Benefits for ${scholarship.title}:`, benefits);
       console.log(`Eligibility for ${scholarship.title}:`, eligibility);
 
+      benefits.forEach((btext) => {
+        console.log("Eligibility text:", btext); // Debug logging
+      });
+
 
       // Extract GWA from eligibility description
       let gwa: string | undefined;
@@ -593,18 +591,13 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
         }
       });
 
-          // Find existing scholarship with the same title
-          const existingScholarship = existingScholarships.find(
-            (sch) => sch.title === scholarship.title
-          );
-
       const newScholarship: Scraped = {
         title: scholarship.title,
         description: benefits.join("\n").trim(),
         benefits: benefits.join(" ").replace(/\n/g, " ").trim(),
         eligibility: eligibility.join(" ").replace(/\n/g, " ").trim(),
         url: scholarship.url,
-        formLink: existingScholarship ? existingScholarship.formLink : "NA",
+        formLink: "NA",
         deadline: "N/A",
         gwa,
         financial,
@@ -615,7 +608,7 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
 
       scholarDataScrape.push(newScholarship);
 
-      // Optional: Add a delay between requests to be manage to the server
+      // Optional: Add a delay between requests to be polite to the server
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
       console.error(`Error scraping ${scholarship.url}:`, error);
@@ -678,10 +671,10 @@ export async function POST(request: Request) {
     const {} = body;
 
     const UNIVERSITIES: UniversityEnum[] = [
-      "De La Salle Benilde",
-      "Far Eastern University",
-      "Colegio de San Juan de Letran",
-      "Ateneo de Manila University",
+     "De La Salle Benilde",
+     "Far Eastern University",
+     "Colegio de San Juan de Letran",
+     "Ateneo de Manila University",
     ];
 
     const allScholarships = await Promise.all(
