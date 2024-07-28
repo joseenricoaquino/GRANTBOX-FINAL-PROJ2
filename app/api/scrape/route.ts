@@ -549,6 +549,7 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
       console.log(`Benefits for ${scholarship.title}:`, benefits);
       console.log(`Eligibility for ${scholarship.title}:`, eligibility);
 
+
       // Extract GWA from eligibility description
       let gwa: string | undefined;
       let financial: string | undefined;
@@ -588,7 +589,7 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
 
       const newScholarship: Scraped = {
         title: scholarship.title,
-        description: "",
+        description: benefits.join("\n").trim(),
         benefits: benefits.join(" ").replace(/\n/g, " ").trim(),
         eligibility: eligibility.join(" ").replace(/\n/g, " ").trim(),
         url: scholarship.url,
