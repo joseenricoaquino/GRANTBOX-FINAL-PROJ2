@@ -168,6 +168,11 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
   const page = await browser.newPage();
   await page.goto(url);
 
+  const FORMLINKS = await prisma.scholarship.findMany({
+    where: { collegeId: existingCollege?.id, sourceType: "SCRAPED" },
+    select: { formLink: true, title: true },
+  });
+
   const scholarDataScrape = await page.evaluate(() => {
     const scholarships = Array.from(
       document.querySelectorAll("#mCSB_2_container div:nth-of-type(n+3)")
@@ -256,7 +261,7 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
         benefits: coverageType,
         deadline: "",
         url: "",
-        formLink: "",
+        formLink: FORMLINKS.find((d) => d.title === title)?.formLink ?? "",
         gwa: undefined,
         financial: undefined,
         citizenship: undefined,
