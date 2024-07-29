@@ -77,6 +77,24 @@ const FormPage = ({ searchParams: { tag } }: IProps) => {
           d.title === "PWD (Person with Disability) Scholarship Preferences"
       );
       return <PWDBasedForm formNum={form} selectedForm={selectedForm} />;
+    case 7:
+      selectedForm = forms.data?.find(
+        (d) =>
+          d.title === "Artists Scholarship Preferences"
+      );
+      return <ArtistBasedForm formNum={form} selectedForm={selectedForm} />;
+    case 8:
+      selectedForm = forms.data?.find(
+        (d) =>
+          d.title === "Minority Scholarship Preferences"
+      );
+      return <MinorityBasedForm formNum={form} selectedForm={selectedForm} />;
+    case 9:
+      selectedForm = forms.data?.find(
+        (d) =>
+          d.title === "Student Worker Scholarship Preferences"
+      );
+      return <StudentWorkerBasedForm formNum={form} selectedForm={selectedForm} />;
     default:
       router.push("/scholarships-compass");
       return null;
@@ -320,7 +338,7 @@ const NeedBasedForm = ({
       >
         <div className="w-full max-w-screen-sm mx-auto space-y-4 mt-4">
           <h2 className="font-bold text-2xl text-center">
-            Academic Based Scholarship Preferences
+            Need-Based Scholarship Preferences
           </h2>
           <div className="grid gap-1">
             <p className="">Are you a first-generation college student?</p>
@@ -772,6 +790,280 @@ const PWDBasedForm = ({
               </div>
             </RadioGroup>
           </div>
+          <Button
+            type="submit"
+            className="h-16 w-full text-xl font-bold"
+            disabled={flag}
+          >
+            Submit{" "}
+            {isLoading && <Loader2 className="w-6 h-6 ml-2 animate-spin" />}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+};
+const ArtistBasedForm = ({
+  formNum,
+  selectedForm,
+}: {
+  formNum: number;
+  selectedForm: FormType | undefined;
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const formSchema = z.object({
+    extraCurricular: z.string().min(1)
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      extraCurricular: selectedForm?.extraCurricular ?? "",
+    },
+  });
+  const router = useRouter();
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    axios
+      .post("/api/compass/form", {
+        ...values,
+        title: FORMS[formNum].title,
+      })
+      .then(async (res) => {
+        if (res.status === 200 && res.data) {
+          toast({
+            title: "Form Checked!",
+          });
+          router.push("/scholarships-compass");
+        }
+      })
+      .catch(() =>
+        toast({
+          title: "Something went wrong!",
+          variant: "destructive",
+        })
+      )
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }
+
+  const flag = isLoading || !form.formState.isDirty;
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex-1 flex flex-col container"
+      >
+        <div className="w-full max-w-screen-sm mx-auto space-y-4 mt-4">
+          <h2 className="font-bold text-2xl text-center">
+            Artists Scholarship Preferences
+          </h2>
+
+          <FormTextArea
+            control={form.control}
+            name="extraCurricular"
+            label="What artworks or books have you written or any artistic pieces you have done?"
+            isLoading={isLoading}
+            placeholder="List all that apply"
+          />
+          <Button
+            type="submit"
+            className="h-16 w-full text-xl font-bold"
+            disabled={flag}
+          >
+            Submit{" "}
+            {isLoading && <Loader2 className="w-6 h-6 ml-2 animate-spin" />}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+};
+const MinorityBasedForm = ({
+  formNum,
+  selectedForm,
+}: {
+  formNum: number;
+  selectedForm: FormType | undefined;
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const formSchema = z.object({
+    culturalOrgs: z.string().min(1)
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      culturalOrgs: selectedForm?.culturalOrgs ?? "",
+    },
+  });
+  const router = useRouter();
+  const [interestedPWD, setinterestedPWD] = useState(selectedForm?.culturalOrgs ?? "yes");
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    axios
+      .post("/api/compass/form", {
+        ...values,
+        memberOfEthnic: interestedPWD === "yes" ? true : false,
+        title: FORMS[formNum].title,
+      })
+      .then(async (res) => {
+        if (res.status === 200 && res.data) {
+          toast({
+            title: "Form Checked!",
+          });
+          router.push("/scholarships-compass");
+        }
+      })
+      .catch(() =>
+        toast({
+          title: "Something went wrong!",
+          variant: "destructive",
+        })
+      )
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }
+
+  const flag = isLoading || !form.formState.isDirty;
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex-1 flex flex-col container"
+      >
+        <div className="w-full max-w-screen-sm mx-auto space-y-4 mt-4">
+          <h2 className="font-bold text-2xl text-center">
+            Minority Scholarship Preferences
+          </h2>
+          <div className="grid gap-1">
+            <p className="">
+              Are you a member of an ethnic or racial minority group?
+            </p>
+            <RadioGroup
+              defaultValue="yes"
+              value={interestedPWD}
+              onValueChange={(e) => setinterestedPWD(e)}
+              className="flex"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="yes" id="yes" />
+                <Label htmlFor="yes">Yes</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="no" id="no" />
+                <Label htmlFor="no">No</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <FormTextArea
+            control={form.control}
+            name="culturalOrgs"
+            label="What cultural organizations have you participated in?"
+            isLoading={isLoading}
+            placeholder="List all that apply"
+          />
+          <Button
+            type="submit"
+            className="h-16 w-full text-xl font-bold"
+            disabled={flag}
+          >
+            Submit{" "}
+            {isLoading && <Loader2 className="w-6 h-6 ml-2 animate-spin" />}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+};
+const StudentWorkerBasedForm = ({
+  formNum,
+  selectedForm,
+}: {
+  formNum: number;
+  selectedForm: FormType | undefined;
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const formSchema = z.object({
+    extraWork: z.string().min(1)
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      extraWork: selectedForm?.extraWork ?? "",
+    },
+  });
+  const router = useRouter();
+  const [interestedPWD, setinterestedPWD] = useState(selectedForm?.extraWork ?? "yes");
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    axios
+      .post("/api/compass/form", {
+        ...values,
+        working: interestedPWD === "yes" ? true : false,
+        title: FORMS[formNum].title,
+      })
+      .then(async (res) => {
+        if (res.status === 200 && res.data) {
+          toast({
+            title: "Form Checked!",
+          });
+          router.push("/scholarships-compass");
+        }
+      })
+      .catch(() =>
+        toast({
+          title: "Something went wrong!",
+          variant: "destructive",
+        })
+      )
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }
+
+  const flag = isLoading || !form.formState.isDirty;
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex-1 flex flex-col container"
+      >
+        <div className="w-full max-w-screen-sm mx-auto space-y-4 mt-4">
+          <h2 className="font-bold text-2xl text-center">
+            Minority Scholarship Preferences
+          </h2>
+
+          <div className="grid gap-1">
+            <p className="">
+              Are you currently employed while attending school?
+            </p>
+            <RadioGroup
+              defaultValue="yes"
+              value={interestedPWD}
+              onValueChange={(e) => setinterestedPWD(e)}
+              className="flex"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="yes" id="yes" />
+                <Label htmlFor="yes">Yes</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="no" id="no" />
+                <Label htmlFor="no">No</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <FormTextArea
+            control={form.control}
+            name="extraWork"
+            label="What jobs are you emplyed in?"
+            isLoading={isLoading}
+            placeholder="List all that apply"
+          />
           <Button
             type="submit"
             className="h-16 w-full text-xl font-bold"

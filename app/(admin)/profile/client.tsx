@@ -487,7 +487,8 @@ const ProfileClient = ({ profile }: { profile: FullStudentType }) => {
           </>
 
           {/* STUDENT BACKGROUND */}
-          <>
+          {/* UNCOMMENT: VIEWING THE STUDENT BACKGROUND */}
+          {/* <>
             <Separator className="my-1" />
             <div className="">
               <Label className="text-xl font-bold text-left -mb-4">
@@ -509,7 +510,7 @@ const ProfileClient = ({ profile }: { profile: FullStudentType }) => {
                 />
               );
             })}
-          </>
+          </> */}
         </form>
       </Form>
     </div>

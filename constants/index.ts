@@ -14,4 +14,7 @@ export const FORMS = [
   { title: "Military Scholarship Preferences" },
   { title: "Community Service Scholarship Preferences" },
   { title: "PWD (Person with Disability) Scholarship Preferences" },
+  { title: "Artists Scholarship Preferences" },
+  { title: "Minority Scholarship Preferences" },
+  { title: "Student Worker Scholarship Preferences" },
 ];
