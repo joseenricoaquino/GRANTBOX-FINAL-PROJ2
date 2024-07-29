@@ -28,6 +28,9 @@ export const calculateEligibility = (
   let sameFoS = false;
   let financeNeeds = false;
 
+  console.log(criteria);
+  console.log(overAll);
+
   if (userBackground && userCriteria) {
     // const truths = Object.entries(userBackground).reduce(
     //   (acc, [key, value]) => {
@@ -203,6 +206,7 @@ export function countNonNullProperties(criteria: Criteria): number {
       key !== "id" &&
       key !== "scholarshipId" &&
       key !== "prevSchool" &&
+      key !== "disability" &&
       value !== null &&
       value !== undefined &&
       value !== "" &&

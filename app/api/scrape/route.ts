@@ -727,8 +727,9 @@ function DataClean(
       };
 
       let parsedDisability = parseDisability(element.description); // Parse and set disability
-      if (parsedDisability !== undefined) {
-        newScholarship.scholarshipType === "PWD Scholarship";
+      
+      if (parsedDisability !== undefined &&  parsedDisability !== null) {
+        newScholarship.scholarshipType ="PWD Scholarship";
       }
 
       let coverageType = parseCoverage(element.benefits);
