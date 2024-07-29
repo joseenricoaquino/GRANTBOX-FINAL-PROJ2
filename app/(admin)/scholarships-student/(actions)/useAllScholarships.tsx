@@ -5,6 +5,7 @@ import { FullScholarshipType, FullStudentType } from "@/utils/interfaces";
 import { useSearchParams } from "next/navigation";
 import { Criteria } from "@prisma/client";
 import {
+  checkBackground,
   checkCitizenshipApproval,
   checkFieldOfStudyApproval,
   checkFinancialApproval,
@@ -13,6 +14,7 @@ import {
   countNonNullProperties,
 } from "@/utils/helpers/recommendations";
 import { getViewScholarship } from "../../dashboard/(actions)/action";
+import { ScholarshipType } from "@/utils/types";
 
 const useAllScholarships = (userInfo: FullStudentType) => {
   const searchParams = useSearchParams();
@@ -55,7 +57,7 @@ function getEligilbilityScore(
 
   let wtElgible: any[] = scholarships
     .map((scholarship) => {
-      let eligibilityScore = getEligible(scholarship.criteria, userInfo);
+      let eligibilityScore = getEligible(scholarship, userInfo);
       return { scholarship, eligibilityScore };
     })
     .filter((el) => el !== undefined);
@@ -64,14 +66,27 @@ function getEligilbilityScore(
   return wtElgible;
 }
 
-const getEligible = (criteria: Criteria, userInfo: FullStudentType) => {
+const getEligible = (
+  scholarship: FullScholarshipType,
+  userInfo: FullStudentType
+) => {
   const { studentBackground, studentCriteria } = userInfo;
+  const { criteria, ...otherScholarshipData } = scholarship;
 
   let pts = 0;
-  const overall = countNonNullProperties(criteria);
+  let overall = countNonNullProperties(criteria);
+  if ((otherScholarshipData.scholarshipType as ScholarshipType) !== "N/A")
+    overall++;
 
   if (overall === 0) return 0;
 
+  if (
+    checkBackground(
+      studentBackground,
+      otherScholarshipData.scholarshipType as ScholarshipType
+    )
+  )
+    pts++;
   if (checkFinancialApproval(studentCriteria, criteria)) pts++;
   if (checkGPAApproval(studentCriteria, criteria)) pts++;
   if (checkResidencyApproval(userInfo, criteria)) pts++;

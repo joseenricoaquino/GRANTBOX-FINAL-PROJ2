@@ -297,11 +297,11 @@ const EditScholarshipClient = ({
                   render={({ field }) => (
                     <FormItem>
                       <div className="grid gap-3">
-                        <FormLabel>Type</FormLabel>
+                        <FormLabel>GPA</FormLabel>
                         <FormControl>
                           <Input
                             type="text"
-                            placeholder="Enter college name..."
+                            placeholder="Enter gpa..."
                             {...field}
                           />
                         </FormControl>

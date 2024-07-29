@@ -131,8 +131,7 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED"},
-      
+        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED" },
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -277,7 +276,7 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED"},
+        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED" },
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -420,7 +419,7 @@ async function handleAteneoScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED"},
+        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED" },
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -479,11 +478,10 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
 
   console.log(scholarshipData);
 
-   // Fetch existing scholarships for merging
-   const existingScholarships = await prisma.scholarship.findMany({
+  // Fetch existing scholarships for merging
+  const existingScholarships = await prisma.scholarship.findMany({
     where: { collegeId: existingCollege?.id, sourceType: "SCRAPED" },
   });
-
 
   for (const scholarship of scholarshipData) {
     try {
@@ -563,7 +561,6 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
         console.log("Eligibility text:", btext); // Debug logging
       });
 
-
       // Extract GWA from eligibility description
       let gwa: string | undefined;
       let financial: string | undefined;
@@ -606,7 +603,6 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
         (sch) => sch.title === scholarship.title
       );
 
-
       const newScholarship: Scraped = {
         title: scholarship.title,
         description: benefits.join("\n").trim(),
@@ -640,7 +636,7 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
   if (cleanedData.length > 0) {
     await prisma.$transaction([
       prisma.scholarship.deleteMany({
-        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED"},
+        where: { collegeId: existingCollege?.id || "", sourceType: "SCRAPED" },
       }),
       prisma.scholarship.createMany({
         data: cleanedData.map((d) => d.newScholarship),
@@ -688,10 +684,10 @@ export async function POST(request: Request) {
     const {} = body;
 
     const UNIVERSITIES: UniversityEnum[] = [
-     "De La Salle Benilde",
-     "Far Eastern University",
-     "Colegio de San Juan de Letran",
-     "Ateneo de Manila University",
+      "De La Salle Benilde",
+      "Far Eastern University",
+      "Colegio de San Juan de Letran",
+      // "Ateneo de Manila University",
     ];
 
     const allScholarships = await Promise.all(
@@ -729,8 +725,11 @@ function DataClean(
         sourceType: "SCRAPED",
         number_of_clicks: 0,
       };
-      
+
       let parsedDisability = parseDisability(element.description); // Parse and set disability
+      if (parsedDisability !== undefined) {
+        newScholarship.scholarshipType === "PWD Scholarship";
+      }
 
       let coverageType = parseCoverage(element.benefits);
       let parsedDeadline = parseDeadline(element.deadline);
@@ -758,7 +757,6 @@ function DataClean(
       newCriteria.extracurricularActivities = parseExtraCurricular(
         element.benefits
       );
-      
 
       return { newScholarship, newCriteria };
     });
@@ -888,11 +886,18 @@ function parseExtraCurricular(strEligibility: string) {
 }
 function parseDisability(strDescription: string): string | null {
   // Define keywords to search for in the description
-  const disabilityKeywords = ["Hearing", "Hard of Hearing", "Hearing Impaired", "Blind", "Visually Impaired", "Deaf"];
-  
+  const disabilityKeywords = [
+    "Hearing",
+    "Hard of Hearing",
+    "Hearing Impaired",
+    "Blind",
+    "Visually Impaired",
+    "Deaf",
+  ];
+
   // Convert the description to lowercase for case-insensitive matching
   const lowerCaseDescription = strDescription.toLowerCase();
-  
+
   // Loop through keywords to find a match
   for (let keyword of disabilityKeywords) {
     if (lowerCaseDescription.includes(keyword.toLowerCase())) {

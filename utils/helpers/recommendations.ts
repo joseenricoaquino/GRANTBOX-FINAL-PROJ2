@@ -1,5 +1,14 @@
-import { Criteria, StudentCriteria, User } from "@prisma/client";
-import { FinancialStatusEnum, ScholarshipMapping } from "../types";
+import {
+  Criteria,
+  StudentBackground,
+  StudentCriteria,
+  User,
+} from "@prisma/client";
+import {
+  FinancialStatusEnum,
+  ScholarshipMapping,
+  ScholarshipType,
+} from "../types";
 
 export const calculateEligibility = (
   userInfo: any,
@@ -10,6 +19,7 @@ export const calculateEligibility = (
 ) => {
   let pts = 0;
   let overAll = countNonNullProperties(criteria);
+  if (currScholarshipType !== "N/A") overAll++;
 
   let inStudentBG = false;
   let inGPA = false;
@@ -28,7 +38,13 @@ export const calculateEligibility = (
       []
     );
 
-    const scholarshipTypes = truths.map((key) => ScholarshipMapping[key]);
+    const scholarshipTypes: any[] = truths.map(
+      (key) => ScholarshipMapping[key]
+    );
+
+    console.log(scholarshipTypes);
+    console.log(currScholarshipType);
+    console.log([...scholarshipTypes].includes(currScholarshipType));
 
     const userFinancial = FinancialStatusEnum.findIndex(
       (d) => d === userCriteria?.financialStatus
@@ -62,6 +78,10 @@ export const calculateEligibility = (
     ) {
       pts++;
       sameFoS = true;
+    }
+    if ([...scholarshipTypes].includes(currScholarshipType)) {
+      pts++;
+      inStudentBG = true;
     }
   }
 
@@ -126,6 +146,50 @@ export function checkFieldOfStudyApproval(
   ) {
     return true;
   } else return false;
+}
+
+export function checkBackground(
+  userBackground: StudentBackground,
+  scholarshipType: ScholarshipType
+): boolean {
+  if (scholarshipType === "N/A") return false;
+  if (
+    scholarshipType === "Athletic Scholarship" &&
+    userBackground.isVarsityScholarship
+  )
+    return true;
+
+  if (
+    scholarshipType === "Academic Scholarship" &&
+    userBackground.isInnnovative // Assuming "isInnnovative" is intended for academic or innovative achievements
+  )
+    return true;
+
+  if (
+    scholarshipType === "Merit Scholarship" &&
+    userBackground.isInnnovative // Assuming "isInnnovative" is intended for merit achievements
+  )
+    return true;
+
+  if (scholarshipType === "Minority Scholarship" && userBackground.isMinority)
+    return true;
+
+  if (
+    scholarshipType === "Creative Scholarship" &&
+    userBackground.isArtistScholarship
+  )
+    return true;
+
+  if (scholarshipType === "PWD Scholarship" && userBackground.isPWD)
+    return true;
+
+  if (
+    scholarshipType === "Student Worker Scholarship" &&
+    userBackground.isStudentWorker
+  )
+    return true;
+
+  return false;
 }
 
 export function countNonNullProperties(criteria: Criteria): number {

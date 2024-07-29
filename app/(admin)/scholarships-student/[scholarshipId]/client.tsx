@@ -44,6 +44,16 @@ const View = ({ scholarship }: { scholarship: FullScholarshipType }) => {
     financeNeeds,
   } = useEligibility(scholarship.criteria, scholarship.scholarshipType as any);
 
+  console.log({
+    eligibility,
+    inStudentBG,
+    inGPA,
+    sameLocation,
+    sameNationality,
+    sameFoS,
+    financeNeeds,
+  });
+
   function eligibleClassName(bool: boolean) {
     return clsx("", bool ? "text-green-500" : "");
   }
@@ -159,9 +169,9 @@ const View = ({ scholarship }: { scholarship: FullScholarshipType }) => {
               label="Citizenship"
             />
             <EligibilityCriteria
-              tag={criteria?.extracurricularActivities}
-              flag={false}
-              label="Clubs Involved in"
+              tag={scholarship.scholarshipType}
+              flag={inStudentBG}
+              label="Has in the student background"
             />
             <EligibilityCriteria
               tag={criteria?.courseInterest}
