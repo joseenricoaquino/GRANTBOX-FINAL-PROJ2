@@ -173,7 +173,7 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
     select: { formLink: true, title: true },
   });
 
-  const scholarDataScrape = await page.evaluate(() => {
+  const scholarDataScrape = await page.evaluate((FORMLINKS) => {
     const scholarships = Array.from(
       document.querySelectorAll("#mCSB_2_container div:nth-of-type(n+3)")
     );
@@ -270,7 +270,7 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
     });
 
     return data;
-  });
+  }, FORMLINKS);
 
   console.log(scholarDataScrape);
   await browser.close();

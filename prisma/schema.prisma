@@ -77,6 +77,17 @@ model Form {
   disabilities  String?
   interestedPWD Boolean?
 
+  //ARTIST BASED
+  extraCurricular String?
+
+  //MINORITY BASED
+  memberOfEthnic Boolean?
+  culturalOrgs String?
+
+  //STUDENT WORKER BASED
+  working Boolean?
+  extraWork String?
+
   studentId String @db.ObjectId
   student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
