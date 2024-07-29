@@ -735,8 +735,23 @@ function DataClean(
         newScholarship.scholarshipType = "PWD Scholarship";
       }
 
-      if (element.title.toLowerCase().includes("athletic")) {
+      if (
+        element.title.toLowerCase().includes("athletic") ||
+        element.title.toLowerCase().includes("talent")
+      ) {
         newScholarship.scholarshipType = "Athletic Scholarship";
+      }
+
+      if (element.title.toLowerCase().includes("arts")) {
+        newScholarship.scholarshipType = "Creative Scholarship";
+      }
+
+      if (
+        element.title.toLowerCase().includes("honor") ||
+        element.title.toLowerCase().includes("honors") ||
+        element.title.toLowerCase().includes("academic")
+      ) {
+        newScholarship.scholarshipType = "Academic Scholarship";
       }
 
       let coverageType = parseCoverage(element.benefits);
