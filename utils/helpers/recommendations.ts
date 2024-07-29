@@ -29,22 +29,18 @@ export const calculateEligibility = (
   let financeNeeds = false;
 
   if (userBackground && userCriteria) {
-    const truths = Object.entries(userBackground).reduce(
-      (acc, [key, value]) => {
-        //@ts-ignore
-        if (value === true) acc.push(key);
-        return acc;
-      },
-      []
-    );
+    // const truths = Object.entries(userBackground).reduce(
+    //   (acc, [key, value]) => {
+    //     //@ts-ignore
+    //     if (value === true) acc.push(key);
+    //     return acc;
+    //   },
+    //   []
+    // );
 
-    const scholarshipTypes: any[] = truths.map(
-      (key) => ScholarshipMapping[key]
-    );
-
-    console.log(scholarshipTypes);
-    console.log(currScholarshipType);
-    console.log([...scholarshipTypes].includes(currScholarshipType));
+    // const scholarshipTypes: any[] = truths.map(
+    //   (key) => ScholarshipMapping[key]
+    // );
 
     const userFinancial = FinancialStatusEnum.findIndex(
       (d) => d === userCriteria?.financialStatus
@@ -79,10 +75,16 @@ export const calculateEligibility = (
       pts++;
       sameFoS = true;
     }
-    if ([...scholarshipTypes].includes(currScholarshipType)) {
+    if (
+      checkBackground(userBackground, currScholarshipType as ScholarshipType)
+    ) {
       pts++;
       inStudentBG = true;
     }
+    // if ([...scholarshipTypes].includes(currScholarshipType)) {
+    //   pts++;
+    //   inStudentBG = true;
+    // }
   }
 
   return {
