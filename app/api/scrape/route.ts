@@ -270,7 +270,7 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
     });
 
     return data;
-  });
+  },FORMLINKS);
 
   console.log(scholarDataScrape);
   await browser.close();
