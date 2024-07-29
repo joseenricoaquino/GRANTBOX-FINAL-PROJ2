@@ -727,9 +727,16 @@ function DataClean(
       };
 
       let parsedDisability = parseDisability(element.description); // Parse and set disability
-      
-      if (parsedDisability !== undefined &&  parsedDisability !== null) {
-        newScholarship.scholarshipType ="PWD Scholarship";
+
+      if (
+        (parsedDisability !== undefined && parsedDisability !== null) ||
+        element.title.toLowerCase().includes("pwd")
+      ) {
+        newScholarship.scholarshipType = "PWD Scholarship";
+      }
+
+      if (element.title.toLowerCase().includes("athletic")) {
+        newScholarship.scholarshipType = "Athletic Scholarship";
       }
 
       let coverageType = parseCoverage(element.benefits);
