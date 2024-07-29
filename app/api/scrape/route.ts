@@ -25,6 +25,7 @@ interface Scraped {
   gwa: string | undefined;
   financial: string | undefined;
   citizenship: string | undefined;
+  disability: string | undefined;
 }
 
 type UniversityEnum =
@@ -117,6 +118,7 @@ async function handleBenildeScrape(url: string, university: UniversityEnum) {
         gwa: gwaElement ? gwaElement.innerText : "N/A",
         financial: undefined,
         citizenship: undefined,
+        disability: undefined,
       };
     });
   });
@@ -259,6 +261,7 @@ async function handleLetranScrape(url: string, university: UniversityEnum) {
         gwa: undefined,
         financial: undefined,
         citizenship: undefined,
+        disability: undefined,
       };
     });
 
@@ -401,6 +404,7 @@ async function handleAteneoScrape(url: string, university: UniversityEnum) {
         gwa: undefined,
         financial: undefined,
         citizenship: undefined,
+        disability: undefined,
       };
     });
 
@@ -614,6 +618,7 @@ async function handleFEUScrape(url: string, university: UniversityEnum) {
         gwa,
         financial,
         citizenship,
+        disability: undefined,
       };
 
       console.log(newScholarship);
@@ -724,6 +729,8 @@ function DataClean(
         sourceType: "SCRAPED",
         number_of_clicks: 0,
       };
+      
+      let parsedDisability = parseDisability(element.description); // Parse and set disability
 
       let coverageType = parseCoverage(element.benefits);
       let parsedDeadline = parseDeadline(element.deadline);
@@ -742,6 +749,7 @@ function DataClean(
         citizenship: element.citizenship ? element.citizenship : null,
         extracurricularActivities: null,
         courseInterest: null,
+        disability: parsedDisability,
       };
 
       newCriteria.financialStatus = parseFinancial(element.eligibility);
@@ -750,6 +758,7 @@ function DataClean(
       newCriteria.extracurricularActivities = parseExtraCurricular(
         element.benefits
       );
+      
 
       return { newScholarship, newCriteria };
     });
@@ -875,5 +884,25 @@ function parseExtraCurricular(strEligibility: string) {
     return "Student Athlete";
   }
 
+  return null;
+}
+function parseDisability(strDescription: string): string | null {
+  // Define keywords to search for in the description
+  const disabilityKeywords = ["Hearing", "Hard of Hearing", "Hearing Impaired", "Blind", "Visually Impaired", "Deaf"];
+  
+  // Convert the description to lowercase for case-insensitive matching
+  const lowerCaseDescription = strDescription.toLowerCase();
+  
+  // Loop through keywords to find a match
+  for (let keyword of disabilityKeywords) {
+    if (lowerCaseDescription.includes(keyword.toLowerCase())) {
+      console.log(`Keyword found: ${keyword}`);
+      return keyword;
+    }
+  }
+
+  console.log(`No keyword found in description: ${lowerCaseDescription}`);
+
+  // If no match found, return null
   return null;
 }
