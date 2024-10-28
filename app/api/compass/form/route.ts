@@ -60,6 +60,24 @@ export async function POST(request: Request) {
           data: { isPWD: true },
         });
         break;
+      case "Artists Scholarship Preferences":
+        await prisma.studentBackground.update({
+          where: { studentId: currentUser.id },
+          data: { isArtistScholarship: true },
+        });
+        break;
+      case "Minority Scholarship Preferences":
+        await prisma.studentBackground.update({
+          where: { studentId: currentUser.id },
+          data: { isMinority: true },
+        });
+        break;
+      case "Student Worker Scholarship Preferences":
+        await prisma.studentBackground.update({
+          where: { studentId: currentUser.id },
+          data: { isStudentWorker: true },
+        });
+        break;
     }
 
     return NextResponse.json("Added Form");
