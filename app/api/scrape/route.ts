@@ -1798,9 +1798,9 @@ export async function POST(request: Request) {
 
     const UNIVERSITIES: UniversityEnum[] = [
       //"De La Salle Benilde",
-      "Mapua University",
+      // "Mapua University",
       // "National Teachers College",
-      // "Colegio de San Juan de Letran",  
+      "Colegio de San Juan de Letran",  
       // "University of Santo Tomas",
       // "Polytechnic University of the Philippines", 
       // "Lyceum of the Philippines University",    
