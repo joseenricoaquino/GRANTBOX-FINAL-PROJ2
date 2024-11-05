@@ -403,12 +403,13 @@ enum CollegeEnum {
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle0' });
 
-    await page.waitForSelector(config.selectors.scholarshipContainer, { timeout: 15000 });
+    await page.waitForSelector(config.selectors.scholarshipContainer, { timeout: 30000 });
   
     const scholarshipData: ScrapedInterfaceCriteria[] = await page.evaluate((config, college, undesiredTitles) => {
       const scholarshipsPod = Array.from(document.querySelectorAll(config.selectors.scholarshipContainer));
-      const requirementsPod = Array.from(document.querySelectorAll(config.selectors.requirementsContainer || ''));
-
+      // Only call querySelectorAll if requirementsContainer is defined
+      const requirementsPod = config.selectors.requirementsContainer?Array.from
+      (document.querySelectorAll(config.selectors.requirementsContainer)): []; // Return an empty array if requirementsContainer is not defined
       // Collect all requirements
       const requirementsText = requirementsPod.map((li: Element) => (li as HTMLElement).innerText.trim());
   
@@ -551,13 +552,13 @@ enum CollegeEnum {
       const {} = body; // Use body properties if needed
   
       const UNIVERSITIES: CollegeEnum[] = [
-        // CollegeEnum.Letran,
+        CollegeEnum.Letran,
         // CollegeEnum.NTC,
         // CollegeEnum.UST,
         // CollegeEnum.PUP,
         // CollegeEnum.LPU,
         // CollegeEnum.MAPUA,
-        CollegeEnum.SPU,
+        // CollegeEnum.SPU,
         // Add more universities as needed
       ];
   
