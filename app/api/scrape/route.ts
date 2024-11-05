@@ -1247,7 +1247,7 @@ async function handleLPUScrape(url: string, university: UniversityEnum) {
 
 }
 
-async function handleArellanoScrape(urls: string[], university: UniversityEnum) {
+async function handleArellanoScrapeOnFix(urls: string[], university: UniversityEnum) {
 
   let allScholarships: ScrapedInterfaceCriteria[] = [];
 
@@ -1588,6 +1588,51 @@ try {
   }
 }
 
+interface ScholarshipArell {
+  title: string;
+  description: string;
+  requirements: string[];
+}
+async function handleArellanoScrape(url: string, university: UniversityEnum) {
+
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        console.log(`Navigating to ${url}...`);
+        await page.goto(url, { waitUntil: 'domcontentloaded' });
+
+
+        const scholarshipData = await page.evaluate(() => {
+          // Find all scholarship titles using <strong> tags
+          const scholarshipSections = Array.from(document.querySelectorAll('p strong'));
+      
+          return scholarshipSections.map((strongElement) => {
+            const title = strongElement.textContent?.trim() || 'No title';
+      
+            // Collect all content that follows the title, until the next title or end of page
+            let details = '';
+            let nextElement = strongElement.parentElement?.nextElementSibling;
+      
+            while (nextElement && !(nextElement.querySelector('strong'))) {
+              // Append the text content of each relevant element to details
+              if (nextElement.textContent) {
+                details += nextElement.textContent.trim() + ' ';
+              }
+              nextElement = nextElement.nextElementSibling;
+            }
+      
+            return {
+              title,
+              details: details.trim() || 'No details available',
+            };
+          });
+        });
+
+        console.log('Scholarship Data:', scholarshipData);
+        await browser.close();
+
+       
+}
+
 async function handleFEUScrape(url: string, university: UniversityEnum) {
 
   const { browser, page } = await initializeScraping();
@@ -1768,10 +1813,11 @@ async function handleBrowseUniversity(university: UniversityEnum) {
             );
     case "Arellano University":
             return handleArellanoScrape(
-              [
               "https://www.arellano.edu.ph/admission/scholarship-programs/",
-              "https://www.arellano.edu.ph/admission/special-student-discounts/"
-              ],
+              // [
+              // "https://www.arellano.edu.ph/admission/scholarship-programs/",
+              // "https://www.arellano.edu.ph/admission/special-student-discounts/"
+              // ],
           university
             );
     case "National Teachers College":
@@ -1800,11 +1846,11 @@ export async function POST(request: Request) {
       //"De La Salle Benilde",
       // "Mapua University",
       // "National Teachers College",
-      "Colegio de San Juan de Letran",  
+      // "Colegio de San Juan de Letran",  
       // "University of Santo Tomas",
       // "Polytechnic University of the Philippines", 
       // "Lyceum of the Philippines University",    
-      // "Arellano University",
+      "Arellano University",
       // "Far Eastern University",
       // "St. Paul University",
 

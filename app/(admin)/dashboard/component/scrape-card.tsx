@@ -21,7 +21,7 @@ const ScrapeCard = () => {
   function handleScrape() {
     setIsLoading(true);
     axios
-      .post("/api/scrape", {})
+      .post("/api/scrape/", {})
       .then((d: any) => {
         if (d.data) {
           toast({
