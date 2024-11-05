@@ -13,8 +13,7 @@ import {
 } from "@/utils/types";
 import clsx from "clsx";
 import { title } from "process";
-
-import puppeteer, { Browser } from 'puppeteer';
+import puppeteer, { Page }from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
 
@@ -394,6 +393,19 @@ enum CollegeEnum {
     },
   };
 
+
+  // Helper function to retry navigation if it times out
+  async function safeGoto(page: Page, url: string, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+      try {
+        await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 }); // Increased timeout to 60 seconds
+        return; // Exit if navigation succeeds
+      } catch (error) {
+        if (i === retries - 1) throw error; // Rethrow error if last retry fails
+      }
+    }
+  }
+
   const undesiredTitles = ["schedule of scholarship application", "financial assistance and tuition discounts","submission of requirements"];
   
   async function scrapeScholarshipData(url: string, college: CollegeEnum) {
@@ -401,10 +413,12 @@ enum CollegeEnum {
   
     const browser = await puppeteer.launch({headless: true});
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle0' });
+    // Use safeGoto to navigate to the URL
+    await safeGoto(page, url);
 
-    await page.waitForSelector(config.selectors.scholarshipContainer, { timeout: 30000 });
+    await page.waitForSelector(config.selectors.scholarshipContainer, { timeout: 15000 });
   
+
     const scholarshipData: ScrapedInterfaceCriteria[] = await page.evaluate((config, college, undesiredTitles) => {
       const scholarshipsPod = Array.from(document.querySelectorAll(config.selectors.scholarshipContainer));
       // Only call querySelectorAll if requirementsContainer is defined
@@ -553,12 +567,12 @@ enum CollegeEnum {
   
       const UNIVERSITIES: CollegeEnum[] = [
         CollegeEnum.Letran,
-        // CollegeEnum.NTC,
-        // CollegeEnum.UST,
-        // CollegeEnum.PUP,
-        // CollegeEnum.LPU,
-        // CollegeEnum.MAPUA,
-        // CollegeEnum.SPU,
+        CollegeEnum.NTC,
+        CollegeEnum.UST,
+        CollegeEnum.PUP,
+        CollegeEnum.LPU,
+        CollegeEnum.MAPUA,
+        CollegeEnum.SPU,
         // Add more universities as needed
       ];
   
