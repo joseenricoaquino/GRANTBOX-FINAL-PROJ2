@@ -133,7 +133,8 @@ type UniversityEnum =
   | "Lyceum of the Philippines University"
   | "Arellano University"
   | "St. Paul University"
-  | "National Teachers College";
+  | "National Teachers College"
+  | "FEU Institute Of Technology";
 
 
 //   // Function to determine scholarship type based on title keywords
@@ -612,6 +613,50 @@ async function handleMapuaScrape(url: string, university: UniversityEnum) {
   } else {
     console.error('scholarshipData is not an array.');
   }
+
+  await browser.close();
+  
+}
+async function handleFEUTECHScrape(url: string, university: UniversityEnum) {
+ 
+  // Scrape the data
+  const browser = await puppeteer.launch({headless: true});
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: 'networkidle2' });
+
+  await page.waitForSelector('h3.clh3', { timeout: 5000 });
+
+  // Step 1: Scrape scholarship types and links
+  const scholarshipData = await page.evaluate(() => {
+    const scholarshipPods = Array.from(document.querySelectorAll("h3.clh3"));
+
+   
+     return scholarshipPods.map((scholarshipElement) => {
+      const titleElement = scholarshipElement.textContent?.trim() || ''; 
+      const titleText = titleElement;
+      // Find the next sibling element that matches the description selector
+      const descriptionElement = scholarshipElement.nextElementSibling; 
+
+      const descriptionText = descriptionElement
+          ? Array.from(descriptionElement.querySelectorAll('li')).map((item) => item.textContent?.trim() || '')
+          : [];
+
+      // const descriptionElement = scholarshipElement.querySelector('.accordion-desc') as HTMLElement; // Cast to HTMLElement
+      // const descriptionText = descriptionElement ? descriptionElement.innerText : 'No description'
+
+   
+      return {
+        title: titleText,
+        description: descriptionText,
+        // description: descriptionText,
+
+      };
+    });
+  });
+
+
+    // Output the  scholarship data with titles and descriptions
+    console.log('Scholarship Data:', scholarshipData);
 
   await browser.close();
   
@@ -1830,6 +1875,11 @@ async function handleBrowseUniversity(university: UniversityEnum) {
               "https://spumanila.edu.ph/students/scholarships",
           university
             );
+    case "FEU Institute Of Technology":
+            return handleFEUTECHScrape(
+              "https://www.feutech.edu.ph/admission/scholarship-grants",
+          university
+            );
         
     default:
       return [];
@@ -1850,8 +1900,9 @@ export async function POST(request: Request) {
       // "University of Santo Tomas",
       // "Polytechnic University of the Philippines", 
       // "Lyceum of the Philippines University",    
-      "Arellano University",
-      // "Far Eastern University",
+      // "Arellano University",
+      "FEU Institute Of Technology",
+      // "St. Paul University",
       // "St. Paul University",
 
     ];

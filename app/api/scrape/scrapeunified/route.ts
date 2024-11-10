@@ -281,13 +281,14 @@ enum CollegeEnum {
     MAPUA = "MAPUA",
     LPU = "LPU",
     SPU = "SPU",
+    FEU = "FEU",
   }
   
   interface ScrapingConfig {
     selectors: {
       scholarshipContainer: string;
-      title: string;
-      description: string;
+      title?: string;
+      description?: string;
       additionaldescription: string;
       eligibility?: string;  // Optional selector
       tosubmit?: string;     // Optional selector for where to submit
@@ -393,6 +394,15 @@ enum CollegeEnum {
       },
       keywords: unifiedKeywords,
     },
+    [CollegeEnum.FEU]: {
+      selectors: {
+        scholarshipContainer: 'h3.clh3',
+        title: '',
+        description: '',
+        additionaldescription: '.col-md-8 p.lead', //optional
+      },
+      keywords: unifiedKeywords,
+    },
   };
 
 
@@ -432,8 +442,11 @@ enum CollegeEnum {
   
       return scholarshipsPod.map((scholarshipsPod) => {
         //main selectors
-        const titleElement = scholarshipsPod.querySelector(config.selectors.title) as HTMLElement;
-        const descriptionElement = scholarshipsPod.querySelector(config.selectors.description) as HTMLElement;
+        const titleElement = config.selectors.title ? scholarshipsPod.querySelector(config.selectors.title) as HTMLElement : null;
+        // Try to get the description element based on the selector if provided, else use the next sibling
+        const descriptionElement = config.selectors.description
+        ? scholarshipsPod.querySelector(config.selectors.description) as HTMLElement
+       : scholarshipsPod.nextElementSibling as HTMLElement;
         const additionaldesElement = scholarshipsPod.querySelector(config.selectors.additionaldescription) as HTMLElement;
         //Optional selectors
         const eligibilityElement = config.selectors.eligibility ? 
@@ -449,8 +462,19 @@ enum CollegeEnum {
         const imageElement = config.selectors.image ? 
         scholarshipsPod.querySelector(config.selectors.image) as HTMLImageElement : null;
         // Elements Text
-        const titleText = titleElement?.textContent?.trim() || 'No title'; // Ensure titleText is never null
-        let descriptionText = descriptionElement ? descriptionElement.innerText : 'No description';
+        const titleText = titleElement?.textContent?.trim() || scholarshipsPod.textContent?.trim() || 'No title'; // Ensure titleText is never null
+        
+        let descriptionText;
+        if (descriptionElement) {
+        // If there are list items, map over them to get trimmed text content, else get plain text
+        const listItems = Array.from(descriptionElement.querySelectorAll('li'));
+        descriptionText = listItems.length > 0
+        ? listItems.map(item => item.textContent?.trim() || '').join(', ')
+        : descriptionElement.innerText.trim();
+        } else {
+          descriptionText = 'No description';
+        }
+
         const additionaldesText = additionaldesElement ? additionaldesElement.innerText : 'No description';
         const eligibilityText = eligibilityElement ? eligibilityElement.innerText : "N/A";
         const tosubmitText = tosubmitElement ? tosubmitElement.innerText : "N/A";
@@ -550,6 +574,7 @@ enum CollegeEnum {
     [CollegeEnum.MAPUA]: "https://www.mapua.edu.ph/pages/admissions/mapua-scholarships/undergraduate",
     [CollegeEnum.LPU]: "https://manila.lpu.edu.ph/admissions/academic-scholarships-and-financial-aid-grants/",
     [CollegeEnum.SPU]: "https://spumanila.edu.ph/students/scholarships",
+    [CollegeEnum.FEU]: "https://www.feutech.edu.ph/admission/scholarship-grants",
   };
   
   async function handleBrowseUniversity(university: CollegeEnum) {
@@ -576,6 +601,7 @@ enum CollegeEnum {
         // CollegeEnum.LPU,
         // CollegeEnum.MAPUA,
         // CollegeEnum.SPU,
+        CollegeEnum.FEU,
         // Add more universities as needed
       ];
   
