@@ -13,7 +13,9 @@ import {
 } from "@/utils/types";
 import clsx from "clsx";
 import { title } from "process";
-import puppeteer, { Page }from 'puppeteer';
+import puppeteer from 'puppeteer';
+import { Page } from 'puppeteer';
+
 import fs from 'fs';
 import path from 'path';
 
@@ -405,13 +407,14 @@ enum CollegeEnum {
       }
     }
   }
+ 
 
   const undesiredTitles = ["schedule of scholarship application", "financial assistance and tuition discounts","submission of requirements"];
   
   async function scrapeScholarshipData(url: string, college: CollegeEnum) {
     const config = scrapingConfigs[college];
   
-    const browser = await puppeteer.launch({headless: true});
+    const browser = await puppeteer.launch({headless: false});
     const page = await browser.newPage();
     // Use safeGoto to navigate to the URL
     await safeGoto(page, url);
@@ -566,13 +569,13 @@ enum CollegeEnum {
       const {} = body; // Use body properties if needed
   
       const UNIVERSITIES: CollegeEnum[] = [
-        CollegeEnum.Letran,
-        CollegeEnum.NTC,
-        CollegeEnum.UST,
-        CollegeEnum.PUP,
-        CollegeEnum.LPU,
-        CollegeEnum.MAPUA,
-        CollegeEnum.SPU,
+        // CollegeEnum.Letran,
+        // CollegeEnum.NTC,
+        // CollegeEnum.UST,
+        // CollegeEnum.PUP,
+        // CollegeEnum.LPU,
+        // CollegeEnum.MAPUA,
+        // CollegeEnum.SPU,
         // Add more universities as needed
       ];
   
