@@ -282,6 +282,7 @@ enum CollegeEnum {
     LPU = "LPU",
     SPU = "SPU",
     FEU = "FEU",
+    AU = "AU",
   }
   
   interface ScrapingConfig {
@@ -403,6 +404,15 @@ enum CollegeEnum {
       },
       keywords: unifiedKeywords,
     },
+    [CollegeEnum.AU]: {
+      selectors: {
+        scholarshipContainer: 'p strong',
+        title: '',
+        description: '',
+        additionaldescription: '.col-md-8 p.lead', //optional
+      },
+      keywords: unifiedKeywords,
+    },
   };
 
 
@@ -444,9 +454,16 @@ enum CollegeEnum {
         //main selectors
         const titleElement = config.selectors.title ? scholarshipsPod.querySelector(config.selectors.title) as HTMLElement : null;
         // Try to get the description element based on the selector if provided, else use the next sibling
+        
         const descriptionElement = config.selectors.description
         ? scholarshipsPod.querySelector(config.selectors.description) as HTMLElement
-       : scholarshipsPod.nextElementSibling as HTMLElement;
+        : scholarshipsPod.nextElementSibling
+        ? scholarshipsPod.nextElementSibling as HTMLElement
+        : scholarshipsPod.parentElement?.nextElementSibling as HTMLElement;
+       
+      //  : scholarshipsPod.parentElement?.nextElementSibling as HTMLElement
+
+
         const additionaldesElement = scholarshipsPod.querySelector(config.selectors.additionaldescription) as HTMLElement;
         //Optional selectors
         const eligibilityElement = config.selectors.eligibility ? 
@@ -474,6 +491,8 @@ enum CollegeEnum {
         } else {
           descriptionText = 'No description';
         }
+
+        
 
         const additionaldesText = additionaldesElement ? additionaldesElement.innerText : 'No description';
         const eligibilityText = eligibilityElement ? eligibilityElement.innerText : "N/A";
@@ -521,6 +540,30 @@ enum CollegeEnum {
      if (college === "PUP") {
         specificDescriptionText = `${descriptionText}\n\nHOW TO APPLY:\n\n${eligibilityText}\n\nWHERE TO SUBMIT:${tosubmitText}\nContact Person:${contactpersonText}\n\nDEADLINE OF APPLICATION:${deadlineElementText}\n\nREMARKS${remarksText}`.trim();
       }
+     if (college === "AU") {
+      const requirementsHeading = descriptionElement?.nextElementSibling;
+      if (requirementsHeading?.tagName === 'UL')
+        {
+          const items = Array.from(requirementsHeading.querySelectorAll('li'));
+        descriptionText += `\n\n\n` + items.map(item => item.textContent?.trim() || '').join(', ');
+        }
+        const requirementsList = requirementsHeading?.nextElementSibling;
+        const requirementsListB = requirementsList?.nextElementSibling;
+
+
+     let requirements = '';
+            if (requirementsList?.tagName === 'UL') {
+              const items = Array.from(requirementsList.querySelectorAll('li'));
+              requirements = `\n\n` + items.map(item => item.textContent?.trim() || '').join(', ');
+            }
+            if (requirementsListB?.tagName === 'UL')
+              {
+                const items = Array.from(requirementsListB.querySelectorAll('li'));
+              requirements += `\n\n` + items.map(item => item.textContent?.trim() || '').join(', ');
+              }
+              specificDescriptionText = `${descriptionText}\n\nrequirements\n\n${requirements}`.trim();
+        }
+
 
      // Check if the title matches any undesired keywords
      if (undesiredTitles.some(undesired => titleText.toLowerCase().includes(undesired.toLowerCase()))) {
@@ -575,6 +618,7 @@ enum CollegeEnum {
     [CollegeEnum.LPU]: "https://manila.lpu.edu.ph/admissions/academic-scholarships-and-financial-aid-grants/",
     [CollegeEnum.SPU]: "https://spumanila.edu.ph/students/scholarships",
     [CollegeEnum.FEU]: "https://www.feutech.edu.ph/admission/scholarship-grants",
+    [CollegeEnum.AU]: "https://www.arellano.edu.ph/admission/scholarship-programs/",
   };
   
   async function handleBrowseUniversity(university: CollegeEnum) {
@@ -601,7 +645,8 @@ enum CollegeEnum {
         // CollegeEnum.LPU,
         // CollegeEnum.MAPUA,
         // CollegeEnum.SPU,
-        CollegeEnum.FEU,
+        // CollegeEnum.FEU,
+        CollegeEnum.AU,
         // Add more universities as needed
       ];
   

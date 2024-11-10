@@ -17,6 +17,7 @@ import { title } from "process";
 import puppeteer, { Browser } from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
+import { Description } from "@radix-ui/react-toast";
 
 //Used For Clearing Temp before Scraping
 function clearPuppeteerTemp() {
@@ -657,6 +658,40 @@ async function handleFEUTECHScrape(url: string, university: UniversityEnum) {
 
     // Output the  scholarship data with titles and descriptions
     console.log('Scholarship Data:', scholarshipData);
+
+  await browser.close();
+  
+}
+async function handleArellanoScrapefix(url: string, university: UniversityEnum) {
+ 
+  // Scrape the data
+  const browser = await puppeteer.launch({headless: false});
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: 'networkidle2' });
+
+  await page.waitForSelector('p strong', { timeout: 15000 });
+
+   // Scrape scholarship data
+   const scholarshipData = await page.evaluate(() => {
+    // Select all scholarship titles
+    const scholarshipPods = Array.from(document.querySelectorAll("p strong"));
+
+    return scholarshipPods.map((scholarshipElement) => {
+      const titleText = scholarshipElement.textContent?.trim() || '';
+
+      // Find the next sibling for the description
+      const descriptionElement = scholarshipElement.nextElementSibling as HTMLElement;
+      const descriptionText = descriptionElement?.textContent?.trim() || 'No description available';
+
+      return {
+        title: titleText,
+        description: descriptionText,
+      };
+    });
+  });
+
+  // Output the scholarship data with titles, descriptions, and requirements
+  console.log('Scholarship Data:', scholarshipData);
 
   await browser.close();
   
@@ -1650,24 +1685,55 @@ async function handleArellanoScrape(url: string, university: UniversityEnum) {
           // Find all scholarship titles using <strong> tags
           const scholarshipSections = Array.from(document.querySelectorAll('p strong'));
       
-          return scholarshipSections.map((strongElement) => {
-            const title = strongElement.textContent?.trim() || 'No title';
+          return scholarshipSections.map((scholarshipPods) => {
+            const title = scholarshipPods.textContent?.trim() || 'No title';
+
+            // Get the description, which is the next <p> sibling of the title's <p> parent
+            const descriptionElement = scholarshipPods.parentElement?.nextElementSibling;
+            let description = descriptionElement?.textContent?.trim() || 'No description';
+
+            // Locate the requirements <ul> by skipping over "Requirements:" <p> tag
+            const requirementsHeading = descriptionElement?.nextElementSibling;
+            
+            if (requirementsHeading?.tagName === 'UL')
+              {
+                const items = Array.from(requirementsHeading.querySelectorAll('li'));
+              description += `\n\n\n` + items.map(item => item.textContent?.trim() || '').join(', ');
+              }
+
+            const requirementsList = requirementsHeading?.nextElementSibling;
+            const requirementsListB = requirementsList?.nextElementSibling;
+
+            let requirements = '';
+            if (requirementsList?.tagName === 'UL') {
+              const items = Array.from(requirementsList.querySelectorAll('li'));
+              requirements = `\n\nRequirements:\n` + items.map(item => item.textContent?.trim() || '').join(', ');
+            }
+            if (requirementsListB?.tagName === 'UL')
+              {
+                const items = Array.from(requirementsListB.querySelectorAll('li'));
+              requirements += `\n\nRequirements:\n` + items.map(item => item.textContent?.trim() || '').join(', ');
+              }
+
+            
       
             // Collect all content that follows the title, until the next title or end of page
-            let details = '';
-            let nextElement = strongElement.parentElement?.nextElementSibling;
+            // let details = '';
+            // let nextElement = strongElement.parentElement?.nextElementSibling;
       
-            while (nextElement && !(nextElement.querySelector('strong'))) {
-              // Append the text content of each relevant element to details
-              if (nextElement.textContent) {
-                details += nextElement.textContent.trim() + ' ';
-              }
-              nextElement = nextElement.nextElementSibling;
-            }
+            // while (nextElement && !(nextElement.querySelector('strong'))) {
+            //   // Append the text content of each relevant element to details
+            //   if (nextElement.textContent) {
+            //     details += nextElement.textContent.trim() + ' ';
+            //   }
+            //   nextElement = nextElement.nextElementSibling;
+            // }
       
             return {
-              title,
-              details: details.trim() || 'No details available',
+              titile: title,
+              description: description,
+              requirements: requirements,
+              // details: details.trim() || 'No details available',
             };
           });
         });
@@ -1900,8 +1966,8 @@ export async function POST(request: Request) {
       // "University of Santo Tomas",
       // "Polytechnic University of the Philippines", 
       // "Lyceum of the Philippines University",    
-      // "Arellano University",
-      "FEU Institute Of Technology",
+      "Arellano University",
+      // "FEU Institute Of Technology",
       // "St. Paul University",
       // "St. Paul University",
 
