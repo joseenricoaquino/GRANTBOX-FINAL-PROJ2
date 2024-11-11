@@ -135,7 +135,8 @@ type UniversityEnum =
   | "Arellano University"
   | "St. Paul University"
   | "National Teachers College"
-  | "FEU Institute Of Technology";
+  | "FEU Institute Of Technology"
+  | "Philippine Womens University";
 
 
 //   // Function to determine scholarship type based on title keywords
@@ -649,6 +650,58 @@ async function handleFEUTECHScrape(url: string, university: UniversityEnum) {
       return {
         title: titleText,
         description: descriptionText,
+        // description: descriptionText,
+
+      };
+    });
+  });
+
+
+    // Output the  scholarship data with titles and descriptions
+    console.log('Scholarship Data:', scholarshipData);
+
+  await browser.close();
+  
+}
+async function handlePWUScrape(url: string, university: UniversityEnum) {
+ 
+  // Scrape the data
+  const browser = await puppeteer.launch({headless: false});
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: 'networkidle2' });
+
+  // await page.waitForSelector('.thegem-custom-6730ea8f778012567 strong', { timeout: 5000 });
+
+  // Step 1: Scrape scholarship types and links
+  const scholarshipData = await page.evaluate(() => {
+    const scholarshipPods = Array.from(document.querySelectorAll("strong"));
+
+   
+     return scholarshipPods.map((scholarshipElement) => {
+      const titleElement = scholarshipElement.textContent?.trim() || ''; 
+      const titleText = titleElement;
+      // Find the next sibling element that matches the description selector
+      const descriptionElement = scholarshipElement.parentElement?.nextElementSibling; 
+      let description = "";
+      if(descriptionElement?.tagName === "P"){
+
+        description = descriptionElement.textContent?.trim() || '';
+      }
+      // if(descriptionElement?.tagName === "UL"){
+
+      //   const items = Array.from(descriptionElement.querySelectorAll('li'));
+      //   description = `\n\n` + items.map(item => item.textContent?.trim() || '').join(', ');
+      // }
+
+       
+
+      // const descriptionElement = scholarshipElement.querySelector('.accordion-desc') as HTMLElement; // Cast to HTMLElement
+      // const descriptionText = descriptionElement ? descriptionElement.innerText : 'No description'
+
+   
+      return {
+        title: titleText,
+        description: description,
         // description: descriptionText,
 
       };
@@ -1946,6 +1999,11 @@ async function handleBrowseUniversity(university: UniversityEnum) {
               "https://www.feutech.edu.ph/admission/scholarship-grants",
           university
             );
+    case "Philippine Womens University":
+            return handlePWUScrape(
+              "https://www.pwu.edu.ph/scholarship/",
+          university
+            );
         
     default:
       return [];
@@ -1966,10 +2024,11 @@ export async function POST(request: Request) {
       // "University of Santo Tomas",
       // "Polytechnic University of the Philippines", 
       // "Lyceum of the Philippines University",    
-      "Arellano University",
+      // "Arellano University",
       // "FEU Institute Of Technology",
       // "St. Paul University",
       // "St. Paul University",
+      "Philippine Womens University",
 
     ];
 
