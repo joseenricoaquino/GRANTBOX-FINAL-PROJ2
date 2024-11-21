@@ -136,7 +136,8 @@ type UniversityEnum =
   | "St. Paul University"
   | "National Teachers College"
   | "FEU Institute Of Technology"
-  | "Philippine Womens University";
+  | "Philippine Womens University"
+  | "Metro Manila Colleges";
 
 
 //   // Function to determine scholarship type based on title keywords
@@ -393,6 +394,57 @@ async function handleNTCScrape(url: string, university: UniversityEnum) {
   await browser.close();
   
 }
+
+async function handleMMNLScrape(url: string, university: UniversityEnum) {
+  const browser = await puppeteer.launch({headless: false});
+  const page = await browser.newPage();
+  
+  let currentPage = 1;
+  let hasNextPage = true;
+  const allData = [];
+
+  // Loop to handle pagination
+  while (hasNextPage) {
+    // Construct the URL for the current page
+    const currentPageUrl = `${url}/p=${currentPage}`;
+    console.log(`Scraping page: ${currentPageUrl}`);
+
+    await page.goto(currentPageUrl);
+
+    // Scrape the data from the page
+    const scholarshipData = await page.evaluate(() => {
+      const scholarshipPods = Array.from(document.querySelectorAll('div.box-inner-top'));
+
+      return scholarshipPods.map((scholarshipElement: Element) => {
+        const titleElement = scholarshipElement.querySelector('h3 a') as HTMLElement;
+        const titleText = titleElement ? titleElement.textContent?.trim() : 'No title';
+        const locationElement = scholarshipElement.querySelector('.location a') as HTMLElement; // Assuming a class for location
+        const locationText = locationElement ? locationElement.textContent?.trim() : 'No specified location';
+        
+        return {
+          title: titleText,
+          location: locationText,
+        };
+      });
+    });
+
+    allData.push(...scholarshipData);
+
+    // Check if there is a next page
+    hasNextPage = await page.evaluate(() => {
+      const nextButton = document.querySelector('a.Next'); // Assuming there is a class 'next-page' for the next button
+      return nextButton !== null;
+    });
+
+    currentPage++;
+  }
+
+  console.log('List of Colleges:', allData);
+
+  await browser.close();
+}
+
+
 async function handleMapuaScrape(url: string, university: UniversityEnum) {
  
   // Scrape the data
@@ -2004,6 +2056,11 @@ async function handleBrowseUniversity(university: UniversityEnum) {
               "https://www.pwu.edu.ph/scholarship/",
           university
             );
+    case "Metro Manila Colleges":
+            return handleMMNLScrape(
+              "https://www.finduniversity.ph/universities/r=national-capital-region",
+          university
+            );
         
     default:
       return [];
@@ -2028,7 +2085,8 @@ export async function POST(request: Request) {
       // "FEU Institute Of Technology",
       // "St. Paul University",
       // "St. Paul University",
-      "Philippine Womens University",
+      // "Philippine Womens University",
+      "Metro Manila Colleges",
 
     ];
 
